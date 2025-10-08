@@ -82,7 +82,7 @@ include(root.'master/header.php');
 </div>
 <!-- /.content-wrapper -->
 
-<!-- new Modal -->
+<!-- Edit Modal -->
 <div class="modal fade" id="btnnewmodal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -91,22 +91,20 @@ include(root.'master/header.php');
                 <h4 class="modal-title">New Category</h4>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-            <form id="frm" method="POST">
+            <form id="frmcategory" method="POST">
                 <input type="hidden" name="action" value="save">
                 <div class='modal-body' data-spy='scroll' data-offset='50'>
                     <div class="form-group">
                         <label for="usr"> Name :</label>
                         <input type="text" class="form-control border-success" name="name" required>
                     </div>
-                </div>
-                <div class='modal-body' data-spy='scroll' data-offset='50'>
                     <div class="form-group">
                         <label for="usr"> Description :</label>
                         <input type="text" class="form-control border-success" name="desc">
                     </div>
                 </div>
                 <div class='modal-footer'>
-                    <button type='submit' id='btnsave' class='btn btn-<?=$color?>'><i class="fas fa-save"></i>
+                    <button type='submit' class='btn btn-<?=$color?>'><i class="fas fa-save"></i>
                         Save</button>
                 </div>
             </form>
@@ -114,19 +112,32 @@ include(root.'master/header.php');
     </div>
 </div>
 
-
-<!-- The Modal -->
-<div class="modal fade" id="editmodal">
+<!-- Edit Modal -->
+<div class="modal fade" id="btneditmodal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <!-- Modal Header -->
             <div class="modal-header bg-<?=$color?>">
                 <h4 class="modal-title">Edit Category</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-            <form id="frm1" method="POST">
-                <!-- Modal body -->
-
+            <form id="frmedit" method="POST">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="eaid">
+                <div class='modal-body' data-spy='scroll' data-offset='50'>
+                    <div class="form-group">
+                        <label for="usr"> Name :</label>
+                        <input type="text" class="form-control border-success" name="ename" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Description :</label>
+                        <input type="text" class="form-control border-success" name="edesc">
+                    </div>
+                </div>
+                <div class='modal-footer'>
+                    <button type='submit' class='btn btn-<?=$color?>'><i class="fas fa-edit"></i>
+                        Edit</button>
+                </div>
             </form>
         </div>
     </div>
@@ -138,7 +149,7 @@ include(root.'master/header.php');
 var ajax_url = "<?php echo roothtml.'setting/category_action.php'; ?>";
 $(document).ready(function() {
 
-    function load_pag(page) {
+    function load_page(page) {
         var entryvalue = $("[name='hid']").val();
         var search = $("[name='ser']").val();
         $.ajax({
@@ -155,96 +166,92 @@ $(document).ready(function() {
             }
         });
     }
-    load_pag();
+    load_page();
 
     $(document).on('click', '.page-link', function() {
         var pageid = $(this).data('page_number');
-        load_pag(pageid);
+        load_page(pageid);
     });
 
     $(document).on("change", "#entry", function() {
         var entryvalue = $(this).val();
         $("[name='hid']").val(entryvalue);
-        load_pag();
+        load_page();
     });
 
 
     $(document).on("keyup", "#searching", function() {
         var serdata = $(this).val();
         $("[name='ser']").val(serdata);
-        load_pag();
+        load_page();
     });
 
     $(document).on("click", "#btnnew", function() {
         $("#btnnewmodal").modal("show");
     });
 
-
-    $(document).on("click", "#btnsave", function(e) {
+    $("#frmcategory").on("submit", function(e) {
         e.preventDefault();
+        var formData = new FormData(this);
+        $("#btnnewmodal").modal("hide");
         $.ajax({
             type: "post",
             url: ajax_url,
-            data: {
-                action: 'save',
-                category: category
-            },
+            data: formData,
+            contentType: false,
+            processData: false,
             success: function(data) {
                 if (data == 1) {
-                    swal("Successful!", "Save Successful.",
+                    swal("Successful",
+                        "Save data success.",
                         "success");
-                    load_pag();
+                    $("[name='name']").val('');
+                    $("[name='desc']").val('');
                     swal.close();
+                    load_page();
                 } else {
-                    swal("Error!", "Error Save.", "error");
+                    swal("Error", "Save Data Error.", "Error");
                 }
             }
         });
     });
-
 
     $(document).on("click", "#btnedit", function(e) {
         e.preventDefault();
         var aid = $(this).data("aid");
-        $.ajax({
-            type: "post",
-            url: "<?php echo roothtml.'setting/category_action.php' ?>",
-            data: {
-                action: 'editprepare',
-                aid: aid
-            },
-            success: function(data) {
-                $("#frm1").html(data);
-            }
-        });
+        var name = $(this).data("name");
+        var desc = $(this).data("desc");
+        $("[name='eaid']").val(aid);
+        $("[name='ename']").val(name);
+        $("[name='edesc']").val(desc);
+        $("#btneditmodal").modal("show");
     });
 
-
-    $(document).on("click", "#btnupdate", function(e) {
+    $("#frmedit").on("submit", function(e) {
         e.preventDefault();
-        var aid = $("#aid").val();
-        var category = $("#category1").val();
+        var formData = new FormData(this);
+        $("#btneditmodal").modal("hide");
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'setting/category_action.php' ?>",
-            data: {
-                action: 'update',
-                aid: aid,
-                category: category
-            },
+            url: ajax_url,
+            data: formData,
+            contentType: false,
+            processData: false,
             success: function(data) {
                 if (data == 1) {
-                    swal("Successful", "Edit data success.",
+                    swal("Successful",
+                        "Edit data success.",
                         "success");
-                    load_pag();
+                    $("[name='ename']").val('');
+                    $("[name='edesc']").val('');
                     swal.close();
+                    load_page();
                 } else {
-                    swal("Error", "Edit data failed.", "error");
+                    swal("Error", "Edit Data Error.", "Error");
                 }
             }
         });
     });
-
 
     $(document).on("click", "#btndelete", function(e) {
         e.preventDefault();
@@ -261,7 +268,7 @@ $(document).ready(function() {
             function() {
                 $.ajax({
                     type: "post",
-                    url: "<?php echo roothtml.'setting/category_action.php'; ?>",
+                    url: ajax_url,
                     data: {
                         action: 'delete',
                         aid: aid
@@ -271,7 +278,7 @@ $(document).ready(function() {
                             swal("Successful",
                                 "Delete data success.",
                                 "success");
-                            load_pag();
+                            load_page();
                             swal.close();
                         } else {
                             swal("Error",

@@ -42,7 +42,7 @@ if(isset($_SESSION['naiip_userid'])){
     <link rel="stylesheet" href="<?php echo roothtml.'lib/plugins/dropzone/min/dropzone.min.css' ?>">
 
     <link rel="stylesheet" href="<?php echo roothtml.'lib/animate.min.css' ?>">
-    <title>BRIGHTWARE POS</title>
+    <title>Quotation MS</title>
     <!-- summernote -->
     <link rel="stylesheet" href="<?php echo roothtml.'lib/plugins/summernote/summernote-bs4.min.css' ?>">
 

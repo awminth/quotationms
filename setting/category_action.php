@@ -58,8 +58,10 @@ if($action == 'show'){
                     </a>
                         <div class='dropdown-menu'>
                             <a href='#' id='btnedit' class='dropdown-item'
-                                data-aid='{$row['AID']}' data-toggle='modal'
-                                data-target='#editmodal'><i class='fas fa-edit text-primary'
+                                data-aid='{$row['AID']}'
+                                data-name='{$row['Name']}'
+                                data-desc='{$row['Description']}'>
+                                <i class='fas fa-edit text-primary'
                                 style='font-size:13px;'></i>
                             Edit</a>
                             <div class='dropdown-divider'></div>
@@ -202,48 +204,15 @@ if($action == 'show'){
 }
 
 if($action == 'save'){
-    $category = $_POST["category"];
-    $sql = "insert into tblcategory (Category) values ('{$category}')";
-    if(mysqli_query($con,$sql)){
-        save_log($_SESSION["naiip_username"]." သည် category အားအသစ်သွင်းသွားသည်။");
-        echo 1;
-    }else{
-        echo 0;
-    }
-}
-
-
-if($action == 'editprepare'){
-    $aid = $_POST["aid"];
-    $sql = "select * from tblcategory where AID=$aid";
-    $result = mysqli_query($con,$sql);
-    $out = "";
-    if(mysqli_num_rows($result) > 0){
-        while($row = mysqli_fetch_array($result)){
-            $out.="<div class='modal-body'>
-                <input type='hidden' id='aid' name='aid' value='{$row['AID']}'/> 
-                <input type='hidden' id='action' name='action' value='editsave' />                              
-                    <div class='form-group'>
-                        <label for='usr'> အမျိုးအစား :</label>
-                        <input type='text' class='form-control border-success' id='category1' name='category1' value='{$row['Category']}'>
-                    </div>                               
-                </div>
-                <div class='modal-footer'>
-                    <button type='submit' id='btnupdate' class='btn btn-{$color}'><i class='fas fa-edit'></i>  ပြင်ဆင်မည်</button>
-                </div>";
-        }
-        echo $out;
-    }
-}
-
-
-if($action == 'update'){
-    $aid = $_POST["aid"];
-    $category = $_POST["category"];
-    
-    $sql = "update tblcategory set Category='{$category}' where AID=$aid";
-    if(mysqli_query($con,$sql)){
-        save_log($_SESSION["naiip_username"]."သည် category အား update လုပ်သွားသည်။");
+    $name = $_POST["name"];
+    $desc = $_POST["desc"];
+    $data = [
+        "Name" => $name,
+        "Description" => $desc
+    ];
+    $result = insertData_Fun("tblcategory",$data);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် category name(".$name .")အမည်ဖြင့်အသစ်သွင်းသွားသည်။");
         echo 1;
     }
     else{
@@ -251,12 +220,34 @@ if($action == 'update'){
     }
 }
 
+if($action == 'edit'){
+    $aid = $_POST["eaid"];
+    $name = $_POST["ename"];
+    $desc = $_POST["edesc"];
+    $data = [
+        "Name" => $name,
+        "Description" => $desc
+    ];
+    $where = [
+        "AID" => $aid
+    ];
+    $result = updateData_Fun("tblcategory",$data,$where);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် category name(".$name .")အားပြင်ဆင်သွားသည်။");
+        echo 1;
+    }
+    else{
+        echo 0;
+    }
+}
 
 if($action == 'delete'){
-
     $aid = $_POST["aid"];
-    $sql = "delete from tblcategory where AID=$aid";
-    if(mysqli_query($con,$sql)){
+    $where = [
+        "AID" => $aid
+    ];
+    $result = deleteData_Fun("tblcategory",$where);
+    if($result){
         save_log($_SESSION["naiip_username"]." သည် category အားဖျက်သွားသည်။");
         echo 1;
     }
@@ -266,64 +257,54 @@ if($action == 'delete'){
     
 }
 
-
 if($action == 'excel'){
     $search = $_POST['ser'];
     $a = "";
     if($search != ''){    
-        $a = " where Category like '%$search%' ";
+        $a = " and Name like '%$search%' ";
     }    
-    $sql="select * from tblcategory  ".$a." 
-    order by AID desc";
+    $sql="SELECT * FROM tblcategory WHERE AID IS NOT NULL ".$a." 
+    ORDER BY AID DESC";
     $result = mysqli_query($con,$sql);
     $out="";
     $fileName = "CategoryReport-".date('d-m-Y').".xls";
-    if(mysqli_num_rows($result) > 0){
-        $out .= '<head><meta charset="utf-8"></head>
+    $out .= '<head><meta charset="utf-8"></head>
         <table >  
             <tr>
-                <td colspan="2" align="center"><h3>Category</h3></td>
+                <td colspan="3" align="center"><h3>Category</h3></td>
             </tr>
-            <tr><td colspan="2"><td></tr>
+            <tr><td colspan="3"><td></tr>
             <tr>  
                 <th style="border: 1px solid ;">No</th>  
-                <th style="border: 1px solid ;">Category</th>       
+                <th style="border: 1px solid ;">Name</th>
+                <th style="border: 1px solid ;">Description</th>     
             </tr>';
+    if(mysqli_num_rows($result) > 0){
         $no=0;
         while($row = mysqli_fetch_array($result)){
             $no = $no + 1;
             $out .= '
                 <tr>  
                     <td style="border: 1px solid ;">'.$no.'</td>  
-                    <td style="border: 1px solid ;">'.$row["Category"].'</td>               
+                    <td style="border: 1px solid ;">'.$row["Name"].'</td>       
+                    <td style="border: 1px solid ;">'.$row["Description"].'</td>          
                 </tr>';
         }
         $out .= '</table>';
         header('Content-Type: application/xls');
         header('Content-Disposition: attachment; filename='.$fileName);
         echo $out;
-    }else{
-        $out .= '<head><meta charset="utf-8"></head>
-        <table >  
+    }
+    else{
+        $out .= '
             <tr>
-                <td colspan="2" align="center"><h3>Category</h3></td>
-            </tr>
-            <tr><td colspan="2"><td></tr>
-            <tr>  
-                <th style="border: 1px solid ;">No</th>  
-                <th style="border: 1px solid ;">Category</th>       
-            </tr>
-            <tr>
-                <td colspan="2" style="border: 1px solid ;" align="center">No data</td>
+                <td colspan="3" style="border: 1px solid ;" align="center">No data</td>
             </tr>';
         $out .= '</table>'; 
         header('Content-Type: application/xls');
         header('Content-Disposition: attachment; filename='.$fileName);
         echo $out;
-    }   
-    
+    }    
 }
-
-
 
 ?>
