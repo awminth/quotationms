@@ -242,7 +242,7 @@ if(isset($_SESSION['naiip_userid'])){
                                         <p>Log History</p>
                                     </a>
                                 </li>
-                                <li class="nav-item">
+                                <li class="nav-item" style="display: none;">
                                     <a href="<?php echo roothtml.'setting/printsetting.php' ?>"
                                         class="nav-link <?php echo (curlink == 'printsetting.php')?'bgactive' : '' ?>">
                                         <i class="far fa-circle nav-icon" style="font-size:10px;"></i>

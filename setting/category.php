@@ -10,7 +10,7 @@ include(root.'master/header.php');
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Category</h1>
+                    <h1>Manage Category</h1>
                 </div>
             </div>
         </div><!-- /.container-fluid -->
@@ -82,7 +82,7 @@ include(root.'master/header.php');
 </div>
 <!-- /.content-wrapper -->
 
-<!-- Edit Modal -->
+<!-- New Modal -->
 <div class="modal fade" id="btnnewmodal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

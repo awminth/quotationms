@@ -115,6 +115,7 @@ include(root.'master/header.php');
 <?php include(root.'master/footer.php'); ?>
 
 <script>
+var ajax_url = "<?php echo roothtml.'setting/log_action.php'; ?>";
 $(document).ready(function() {
 
     function load_pag(page) {
@@ -125,7 +126,7 @@ $(document).ready(function() {
         var user = $("[name='user']").val();
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'setting/log_action.php' ?>",
+            url: ajax_url,
             data: {
                 action: 'show',
                 page_no: page,

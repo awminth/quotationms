@@ -27,7 +27,7 @@ if($action == 'show'){
     $user=$_POST['user'];
     $a = "";
     if($search != ''){  
-        $a = " and (l.Description like '%$search%') ";
+        $a .= " and (l.Description like '%$search%') ";
     }      
     if($to != ''){  
         $a .= " and (l.Date <= '$to') ";
@@ -38,12 +38,8 @@ if($action == 'show'){
     if($user != ''){  
         $a .= " and (l.UserID = '$user') ";
     }  
-    $sql = "select l.*,u.UserName as uname,c.UserName as cname  
-    from tbllog l 
-    left join tbluser u on u.AID=l.UserID and l.Chk=0 
-    left join tblcustomer c on c.AID=l.UserID and l.Chk=1 
-    where l.AID is not null ".$a." 
-    order by l.AID limit {$offset},{$limit_per_page}";
+    $sql = "SELECT l.*,u.UserName AS uname FROM tbluser u,tbllog l WHERE u.AID=l.UserID ".$a." 
+    ORDER BY AID DESC LIMIT {$offset},{$limit_per_page}";
         
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     $out="";
@@ -79,12 +75,8 @@ if($action == 'show'){
         $out.="</tbody>";
         $out.="</table>";
 
-        $sql_total="select l.AID   
-        from tbllog l 
-        left join tbluser u on u.AID=l.UserID and l.Chk=0 
-        left join tblcustomer c on c.AID=l.UserID and l.Chk=1 
-        where l.AID is not null ".$a." 
-        order by l.AID";
+        $sql_total="SELECT l.AID FROM tbluser u,tbllog l WHERE u.AID=l.UserID ".$a." 
+        ORDER BY AID DESC";
         $record = mysqli_query($con,$sql_total) or die("fail query");
         $total_record = mysqli_num_rows($record);
         $total_links = ceil($total_record/$limit_per_page);
