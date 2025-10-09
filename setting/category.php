@@ -100,7 +100,7 @@ include(root.'master/header.php');
                     </div>
                     <div class="form-group">
                         <label for="usr"> Description :</label>
-                        <input type="text" class="form-control border-success" name="desc">
+                        <textarea rows="5" class="form-control border-success" name="desc"></textarea>
                     </div>
                 </div>
                 <div class='modal-footer'>
@@ -131,7 +131,7 @@ include(root.'master/header.php');
                     </div>
                     <div class="form-group">
                         <label for="usr"> Description :</label>
-                        <input type="text" class="form-control border-success" name="edesc">
+                        <textarea rows="5" class="form-control border-success" name="edesc"></textarea>
                     </div>
                 </div>
                 <div class='modal-footer'>

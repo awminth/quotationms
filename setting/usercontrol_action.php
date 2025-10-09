@@ -72,13 +72,6 @@ if($action == 'show'){
                                 class='fas fa-trash text-danger'
                                 style='font-size:13px;'></i>
                             Delete</a> 
-                            <div class='dropdown-divider'></div>
-                            <a href='#' id='btnpermission' class='dropdown-item'
-                                data-aid='{$row['AID']}' 
-                                data-username='{$row['UserName']}' ><i
-                                class='fas fa-key text-success'
-                                style='font-size:13px;'></i>                        
-                            Permission</a>
                         </div>
                     </div>
                 </td>

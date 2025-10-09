@@ -15,6 +15,7 @@ include(root.'master/header.php');
             </div>
         </div><!-- /.container-fluid -->
     </section>
+
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -28,7 +29,7 @@ include(root.'master/header.php');
                                                 class="fas fa-plus"></i>&nbsp; New
                                         </button></td>
                                     <td>
-                                        <form method="POST" action="usercontrol_action.php">
+                                        <form method="POST" action="createquotation_action.php">
                                             <input type="hidden" name="hid">
                                             <input type="hidden" name="ser">
                                             <button type="submit" name="action" value="excel"
@@ -61,7 +62,7 @@ include(root.'master/header.php');
                                             <label for="inputEmail3" class="col-sm-2 col-form-label">Search</label>
                                             <div class="col-sm-10">
                                                 <input type="search" class="form-control" id="searching"
-                                                    placeholder="Searching . . . . . ">
+                                                    placeholder="Searching . . . . .">
                                             </div>
                                         </div>
                                     </td>
@@ -81,63 +82,70 @@ include(root.'master/header.php');
 </div>
 <!-- /.content-wrapper -->
 
-<!-- new Modal -->
+<!-- New Modal -->
 <div class="modal fade" id="btnnewmodal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-
             <!-- Modal Header -->
             <div class="modal-header bg-<?=$color?>">
-                <h4 class="modal-title">Add New User</h4>
+                <h4 class="modal-title">New Quotation</h4>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-
-            <!-- Modal body -->
-            <div class='modal-body' data-spy='scroll' data-offset='50'>
-                <form id="frm" method="POST">
-
+            <form id="frmquotation" method="POST">
+                <input type="hidden" name="action" value="save">
+                <div class='modal-body' data-spy='scroll' data-offset='50'>
                     <div class="form-group">
-                        <label for="usr">User Name:</label>
-                        <input type="text" required class="form-control border-success" name="username" id="username"
-                            placeholder="Enter username">
+                        <label for="usr"> Title :</label>
+                        <input type="text" class="form-control border-success" name="title" required>
                     </div>
                     <div class="form-group">
-                        <label for="usr">Password :</label>
-                        <input type="password" required class="form-control border-success" name="password"
-                            id="password" placeholder="Enter password">
+                        <label for="usr"> Remark :</label>
+                        <textarea rows="5" class="form-control border-success" name="remark"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="usr">User Type :</label>
-                        <select required class="form-control select2" name="usertype" id="usertype"
-                            style="height:100%;">
-                            <option value="">Choose User Type</option>
-                            <option value="Admin">Admin</option>
-                            <option value="User">User</option>
-                        </select>
+                        <label for="usr"> Date :</label>
+                        <input type="date" class="form-control border-success" name="dt" value="<?=date('Y-m-d')?>">
                     </div>
-                    <div class='modal-footer'>
-                        <button type='submit' id='btnsave' class='btn btn-<?=$color?>'><i class="fas fa-save"></i>
-                            အသစ်သွင်းမည်</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class='modal-footer'>
+                    <button type='submit' class='btn btn-<?=$color?>'><i class="fas fa-save"></i>
+                        Save</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-<!-- end modal -->
 
-<!-- The Modal -->
-<div class="modal fade" id="editmodal">
+<!-- Edit Modal -->
+<div class="modal fade" id="btneditmodal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <!-- Modal Header -->
             <div class="modal-header bg-<?=$color?>">
-                <h4 class="modal-title">Edit UserControl</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Quotation</h4>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
-            <form id="frm1" method="POST">
-                <!-- Modal body -->
-
+            <form id="frmedit" method="POST">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="eaid">
+                <div class='modal-body' data-spy='scroll' data-offset='50'>
+                    <div class="form-group">
+                        <label for="usr"> Title :</label>
+                        <input type="text" class="form-control border-success" name="etitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Remark :</label>
+                        <textarea rows="5" class="form-control border-success" name="eremark"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Date :</label>
+                        <input type="date" class="form-control border-success" name="edt">
+                    </div>
+                </div>
+                <div class='modal-footer'>
+                    <button type='submit' class='btn btn-<?=$color?>'><i class="fas fa-edit"></i>
+                        Edit</button>
+                </div>
             </form>
         </div>
     </div>
@@ -146,14 +154,15 @@ include(root.'master/header.php');
 <?php include(root.'master/footer.php'); ?>
 
 <script>
+var ajax_url = "<?php echo roothtml.'createquotation/createquotation_action.php'; ?>";
 $(document).ready(function() {
 
-    function load_pag(page) {
+    function load_page(page) {
         var entryvalue = $("[name='hid']").val();
         var search = $("[name='ser']").val();
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'setting/usercontrol_action.php' ?>",
+            url: ajax_url,
             data: {
                 action: 'show',
                 page_no: page,
@@ -165,113 +174,172 @@ $(document).ready(function() {
             }
         });
     }
-    load_pag();
+    load_page();
 
     $(document).on('click', '.page-link', function() {
         var pageid = $(this).data('page_number');
-        load_pag(pageid);
+        load_page(pageid);
     });
 
     $(document).on("change", "#entry", function() {
         var entryvalue = $(this).val();
         $("[name='hid']").val(entryvalue);
-        load_pag();
+        load_page();
     });
 
 
     $(document).on("keyup", "#searching", function() {
         var serdata = $(this).val();
         $("[name='ser']").val(serdata);
-        load_pag();
-    });
-
-
-    $('.select2').select2({
-        theme: 'bootstrap4'
+        load_page();
     });
 
     $(document).on("click", "#btnnew", function() {
         $("#btnnewmodal").modal("show");
     });
 
-    $(document).on("click", "#btnsave", function(e) {
+    $("#frmquotation").on("submit", function(e) {
         e.preventDefault();
-        var username = $("#username").val();
-        var password = $("#password").val();
-        var usertype = $("#usertype").val();
-        if (username == "" || password == "" || usertype == "") {
-            swal("Information", "Please fill all data", "info");
-        } else {
-            $.ajax({
-                type: "post",
-                url: "<?php echo roothtml.'setting/usercontrol_action.php' ?>",
-                data: {
-                    action: 'save',
-                    username: username,
-                    password: password,
-                    usertype: usertype
-                },
-                success: function(data) {
-                    if (data == 1) {
-                        swal("Successful!", "Save Successful.",
-                            "success");
-                        load_pag();
-                        swal.close();
-                    } else {
-                        swal("Error!", "Error Save.", "error");
-                    }
+        var formData = new FormData(this);
+        $("#btnnewmodal").modal("hide");
+        $.ajax({
+            type: "post",
+            url: ajax_url,
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+                if (data == 1) {
+                    swal("Successful",
+                        "Save data success.",
+                        "success");
+                    $("[name='title']").val('');
+                    $("[name='remark']").val('');
+                    swal.close();
+                    load_page();
+                } else {
+                    swal("Error", "Save Data Error.", "Error");
                 }
+            }
+        });
+    });
+
+    $(document).on("click", "#btnunactive", function(e) {
+        e.preventDefault();
+        var aid = $(this).data("aid");
+        var title = $(this).data("title");
+        swal({
+                title: "Unactive?",
+                text: "Are you sure unactive!",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonClass: "btn-warning",
+                confirmButtonText: "Yes, unactive it!",
+                closeOnConfirm: false
+            },
+            function() {
+                $.ajax({
+                    type: "post",
+                    url: ajax_url,
+                    data: {
+                        action: 'unactive',
+                        aid: aid,
+                        title: title
+                    },
+                    success: function(data) {
+                        if (data == 1) {
+                            swal("Successful",
+                                "Unactive data success.",
+                                "success");
+                            load_page();
+                            swal.close();
+                        } else {
+                            swal("Error",
+                                "Unactive data failed.",
+                                "error");
+                        }
+                    }
+                });
             });
-        }
+    });
+
+    $(document).on("click", "#btnactive", function(e) {
+        e.preventDefault();
+        var aid = $(this).data("aid");
+        var title = $(this).data("title");
+        swal({
+                title: "Active?",
+                text: "Are you sure Active!",
+                type: "success",
+                showCancelButton: true,
+                confirmButtonClass: "btn-success",
+                confirmButtonText: "Yes, Active it!",
+                closeOnConfirm: false
+            },
+            function() {
+                $.ajax({
+                    type: "post",
+                    url: ajax_url,
+                    data: {
+                        action: 'active',
+                        aid: aid,
+                        title: title
+                    },
+                    success: function(data) {
+                        if (data == 1) {
+                            swal("Successful",
+                                "Active data success.",
+                                "success");
+                            load_page();
+                            swal.close();
+                        } else {
+                            swal("Error",
+                                "Active data failed.",
+                                "error");
+                        }
+                    }
+                });
+            });
     });
 
     $(document).on("click", "#btnedit", function(e) {
         e.preventDefault();
         var aid = $(this).data("aid");
-        $.ajax({
-            type: "post",
-            url: "<?php echo roothtml.'setting/usercontrol_action.php' ?>",
-            data: {
-                action: 'editprepare',
-                aid: aid
-            },
-            success: function(data) {
-                $("#frm1").html(data);
-            }
-        });
+        var title = $(this).data("title");
+        var remark = $(this).data("remark");
+        var dt = $(this).data("dt");
+        $("[name='eaid']").val(aid);
+        $("[name='etitle']").val(title);
+        $("[name='eremark']").val(remark);
+        $("[name='edt']").val(dt);
+        $("#btneditmodal").modal("show");
     });
 
-
-    $(document).on("click", "#btnupdate", function(e) {
+    $("#frmedit").on("submit", function(e) {
         e.preventDefault();
-        var aid = $("#aid").val();
-        var username = $("#username1").val();
-        var password = $("#password1").val();
-        var usertype = $("#usertype1").val();
+        var formData = new FormData(this);
+        $("#btneditmodal").modal("hide");
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'setting/usercontrol_action.php' ?>",
-            data: {
-                action: 'update',
-                aid: aid,
-                username: username,
-                password: password,
-                usertype: usertype
-
-            },
+            url: ajax_url,
+            data: formData,
+            contentType: false,
+            processData: false,
             success: function(data) {
                 if (data == 1) {
-                    swal("Successful", "Edit data success.",
+                    swal("Successful",
+                        "Edit data success.",
                         "success");
-                    load_pag();
+                    $("[name='etitle']").val('');
+                    $("[name='eremark']").val('');
                     swal.close();
+                    load_page();
                 } else {
-                    swal("Error", "Edit data failed.", "error");
+                    swal("Error", "Edit Data Error.", "Error");
                 }
             }
         });
     });
-
 
     $(document).on("click", "#btndelete", function(e) {
         e.preventDefault();
@@ -288,7 +356,7 @@ $(document).ready(function() {
             function() {
                 $.ajax({
                     type: "post",
-                    url: "<?php echo roothtml.'setting/usercontrol_action.php'; ?>",
+                    url: ajax_url,
                     data: {
                         action: 'delete',
                         aid: aid
@@ -298,7 +366,7 @@ $(document).ready(function() {
                             swal("Successful",
                                 "Delete data success.",
                                 "success");
-                            load_pag();
+                            load_page();
                             swal.close();
                         } else {
                             swal("Error",
@@ -308,24 +376,6 @@ $(document).ready(function() {
                     }
                 });
             });
-    });
-
-    $(document).on("click", "#btnpermission", function(e) {
-        e.preventDefault();
-        var aid = $(this).data("aid");
-        var username = $(this).data("username");
-        $.ajax({
-            type: "post",
-            url: "<?php echo roothtml.'setting/permission.php' ?>",
-            data: {
-                action: 'prepare',
-                aid: aid,
-                username: username
-            },
-            success: function(data) {
-                location.href = '<?php echo roothtml.'setting/permission.php' ?>?aid=' + aid + '&username=' + username;
-            }
-        });
     });
 
 });
