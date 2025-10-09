@@ -35,16 +35,16 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
                                     class="fas fa-plus"></i> New</a>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <div id="showtablecreate"></div>
+                            <div class="col-sm-12">
+                                <div id="showtable"></div>
+                                <hr class="my-3">
+                                <!-- For text boxes -->
+                                <div class="col-sm-10 float-right">
                                     <form id="frmsave" method="POST">
                                         <input type="hidden" name="action" value="save" />
-                                        <input type="hidden" name="pretotalprice" />
                                         <div class="col-md-12">
                                             <div class="form-group row">
-                                                <label class="col-md-3 label-control"
-                                                    for="userinput1">Discount(%)</label>
+                                                <label class="col-md-3 label-control" for="userinput1">Select Category</label>
                                                 <div class="col-md-9 mx-auto">
                                                     <input type="number" class="form-control border-primary text-right"
                                                         placeholder="Discount" value="0" name="disc" id="disc">
@@ -98,8 +98,6 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
                                                     </div>
                                                 </div>
                                             </div>
-
-
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group row">
@@ -161,73 +159,30 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
     </div>
 </div>
 
-<!-- customer Modal -->
-<div class="modal fade" id="btnnewmodal">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header bg-teal">
-                <h4 class="modal-title">New Customer</h4>
-                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-            </div>
-            <form id="frm" method="POST">
-                <!-- Modal body -->
-                <div class='modal-body' data-spy='scroll' data-offset='50'>
-                    <div class="form-group">
-                        <label for="usr"> အမည် :</label>
-                        <input type="text" class="form-control border-success" id="name" name="name"
-                            placeholder="Customer Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="usr"> ဖုန်းနံပါတ် :</label>
-                        <input type="text" class="form-control border-success" id="phno" name="phno"
-                            placeholder="Phone No">
-                    </div>
-                    <div class="form-group">
-                        <label for="usr"> နေရပ်လိပ်စာ :</label>
-                        <input type="text" class="form-control border-success" id="address" name="address"
-                            placeholder="Address">
-                    </div>
-                    <div class="form-group">
-                        <label for="usr"> အီးမေးလ် :</label>
-                        <input type="email" class="form-control border-success" id="email" name="email"
-                            placeholder="Email">
-                    </div>
-                </div>
-                <div class='modal-footer'>
-                    <button type='submit' id='btnsave' class='btn btn-success'><i class="fas fa-save"></i>
-                        အသစ်သွင်းမည်</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <?php include(root.'master/footer.php'); ?>
 
 <script>
-var ajax_url = "<?php echo roothtml.'preorder/preorder_action.php'; ?>";
+var ajax_url = "<?php echo roothtml.'home/quotation_action.php'; ?>";
 
 $(document).ready(function() {
 
-    function load_pagecreate(page) {
+    function loadpage(page) {
         $.ajax({
             type: "post",
             url: ajax_url,
             global: false,
             data: {
-                action: 'showcreate'
+                action: 'show'
             },
             success: function(data) {
-                $("#showtablecreate").html(data);
-                calculate_one();
+                $("#showtable").html(data);
                 $("[name='itemname']").focus();
             }
         });
 
         // calculate();
     }
-    load_pagecreate();
+    loadpage();
 
     function calculate() {
         var qty = $("[name='qty']").val();
