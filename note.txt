@@ -3,3 +3,15 @@ viewquotation
  -delete
  -view
  -upload pdf
+
+ALTER TABLE `quotationms`.`tblquotation` 
+ADD COLUMN `UserID` INT NULL AFTER `Date`;
+
+ALTER TABLE `quotationms`.`tblquotationvoucher` 
+ADD COLUMN `UserID` INT NULL AFTER `Date`;
+
+ALTER TABLE `quotationms`.`tblquotation` 
+ADD COLUMN `VNO` VARCHAR(45) NULL AFTER `AID`;
+
+ALTER TABLE `quotationms`.`tblquotationvoucher` 
+ADD COLUMN `VNO` VARCHAR(45) NULL AFTER `AID`;

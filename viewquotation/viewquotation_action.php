@@ -2,6 +2,7 @@
 include('../config.php');
 
 $action = $_POST["action"];
+$userid = $_SESSION["naiip_userid"];
 
 
 if($action == 'show'){  
@@ -25,23 +26,20 @@ if($action == 'show'){
     $search = $_POST['search'];
     $a = "";
     if($search != ''){  
-        $a = " and (v.VNO like '%$search%' or c.Name like '%$search%' or u.UserName like '%$search%') ";
+        $a .= " AND (c.Title like '%$search%') ";
     } 
     $from=$_POST['from'];  
     $to=$_POST['to'];     
-    $customer=$_POST['customer'];   
-    $b="";
-    $c="";
+    $quotation=$_POST['quotation'];
     if($from!='' || $to!=''){
-        $b=" and Date(v.Date)>='{$from}' and Date(v.Date)<='{$to}' ";
+        $a .=" and Date(q.Date)>='{$from}' and Date(q.Date)<='{$to}' ";
     }  
-    if($customer!=''){
-        $c=" and v.CustomerID={$customer} ";
+    if($quotation!=''){
+        $a .=" and q.CreatequotationID={$quotation} ";
     }   
-    $sql="select v.*,Date(v.Date) as vdate,c.Name,u.UserName 
-    from tblvoucher v,tblcustomer c,tbluser u 
-    where v.UserID=u.AID and v.CustomerID=c.AID and v.Chk='Cash' ".$b.$c.$a." 
-    order by AID desc limit $offset,$limit_per_page";
+    $sql="SELECT q.*,c.AID AS caid,c.Title AS ctitle,p.Name AS projectname FROM tblquotationvoucher q,
+    tblcreatequotation c,tblproject p WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID AND 
+    q.UserID='{$userid}' ".$a." ORDER BY q.AID DESC limit $offset,$limit_per_page";
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     $out="";
     if(mysqli_num_rows($result) > 0){
@@ -49,76 +47,40 @@ if($action == 'show'){
         <table class="table table-bordered tabel-sm table-striped responsive nowrap">
         <thead>
         <tr>
-            <th width="7%;">စဉ်</th>
-            <th>Date</th>                                        
-            <th>VNO</th>
-            <th>Customer</th>
-            <th class="text-right">SubTotal</th>                                                                             
-            <th>Disc</th>
-            <th>Tax</th>
-            <th class="text-right">Total</th>  
-            <th class="text-right">Cash</th> 
-            <th class="text-right">Refund</th> 
-            <th>Cashier</th>     
+            <th width="7%;">No</th>
+            <th>Quotation Title</th>                                        
+            <th>Project Name</th>
+            <th>Name</th>
+            <th>Date</th>     
             <th width="10%;" class="text-center">Actions</th>       
         </tr>
         </thead>
         <tbody>
         ';
         $no=0;
-        $totalamt=0;
-        $totaldis=0;
-        $totaltax=0;
-        $total=0;
-        $totalcash=0;
-        $totalrefund=0;
         while($row = mysqli_fetch_array($result)){
             $no = $no + 1;
-            $totalamt+=$row["TotalAmt"];
-            $totaldis+=$row["Dis"];
-            $totaltax+=$row["Tax"];
-            $total+=$row["Total"];
-            $totalcash+=$row["Cash"];
-            $totalrefund+=$row["Refund"];
             $out.="<tr>
                 <td>{$no}</td>
-                <td><span class='badge badge-info'>".enDate($row["vdate"])."</span></td>
-                <td><span class='badge badge-info'>{$row["VNO"]}</span></td>
+                <td>{$row["ctitle"]}</td>
+                <td>{$row["projectname"]}</td>
                 <td>{$row["Name"]}</td>
-                <td class='text-right' >".number_format($row["TotalAmt"])."</td>                                       
-                <td  class='text-right' >".number_format($row["Dis"])."</td>
-                <td class='text-right' >".number_format($row["Tax"])."</td>
-                <td class='text-right' >".number_format($row["Total"])."</td>
-                <td class='text-right' >".number_format($row["Cash"])."</td>
-                <td class='text-right' >".number_format($row["Refund"])."</td>
-                <td >{$row["UserName"]}</td> 
+                <td><span class='badge badge-info'>".enDate($row["Date"])."</span></td>
                 <td class='text-center'>
                     <div class='btn-group btn-group-sm'>
-                        <a href='#' id='viewsell' data-toggle='tooltip' data-placement='bottom'
-                            title='အသေးစိတ်ကြည့်မည်' data-vno='{$row['VNO']}'
-                            data-customerid='{$row['CustomerID']}'
-                            data-cusname='{$row['Name']}'
-                            data-userid='{$row['UserID']}'
-                            data-date='{$row['Date']}'
-                            data-totalamt='{$row['TotalAmt']}'
-                            data-total='{$row['Total']}'
-                            data-dis='{$row['Dis']}'
-                            data-tax='{$row['Tax']}'
-                            data-cash='{$row['Cash']}'
-                            data-refund='{$row['Refund']}' 
-                            data-credit='{$row['Credit']}' 
-                            data-chk='{$row['Chk']}' 
+                        <a href='#' id='btnview' data-toggle='tooltip' data-placement='bottom'
+                            title='အသေးစိတ်ကြည့်မည်'
+                            data-aid='{$row['AID']}'
+                            data-createquotationid='{$row['CreatequotationID']}'
                             class='btn btn-success btn-sm'><i class='fas fa-eye'></i></a>
-                        <a style='display:none;' href='#' id='editsell' data-toggle='tooltip' data-placement='bottom'
+                        <a href='#' id='btnedit' data-toggle='tooltip' data-placement='bottom'
                             title='ပြင်ဆင်မည်' 
-                            data-vno='{$row['VNO']}'
-                            data-customerid='{$row['CustomerID']}'
-                            data-customername='{$row['Name']}'
-                            data-totalamt='{$row['TotalQty']}'
-                            data-totalqty='{$row['TotalAmt']}' 
-                            data-chk='{$row['Chk']}'  class='btn btn-info btn-sm'><i
+                            data-aid='{$row['AID']}'
+                            data-createquotationid='{$row['CreatequotationID']}' class='btn btn-info btn-sm'><i
                             class='fas fa-edit'></i></a>
-                        <a href='#' data-vno='{$row['VNO']}' id='deletesell' data-toggle='tooltip' data-placement='bottom'
+                        <a href='#' id='btndelete' data-toggle='tooltip' data-placement='bottom'
+                            data-aid='{$row['AID']}'
+                            data-createquotationid='{$row['CreatequotationID']}'
                             title='ဖျက်သိမ်းမည်' class='btn btn-danger btn-sm'><i
                             class='fas fa-trash'></i></a>
                     </div>
@@ -126,28 +88,11 @@ if($action == 'show'){
             </tr>";
         }
         $out.="</tbody>";
-        $out.="<tfoot>
-                    <tr>                                                                               
-                        <td></td>
-                        <td></td>  
-                        <td></td>                                     
-                        <td>စုစုပေါင်း</td>
-                        <td class='text-right' >".number_format($totalamt)."</td>                                       
-                        <td class='text-right'>".number_format($totaldis)."</td>
-                        <td class='text-right' >".number_format($totaltax)."</td>
-                        <td class='text-right' >".number_format($total)."</td>
-                        <td class='text-right' >".number_format($totalcash)."</td>
-                        <td class='text-right' >".number_format($totalrefund)."</td>
-                        <td></td>   
-                        <td></td>                                 
-                    </tr>
-                </tfoot>";
         $out.="</table>";
 
-        $sql_total="select v.AID  
-        from tblvoucher v,tblcustomer c,tbluser u 
-        where v.UserID=u.AID and v.CustomerID=c.AID and v.Chk='Cash' ".$b.$c.$a." 
-        order by AID desc";
+        $sql_total="SELECT q.AID FROM tblquotationvoucher q,tblcreatequotation c,tblproject p
+        WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID AND q.UserID='{$userid}' ".$a." 
+        ORDER BY q.AID DESC";
         $record = mysqli_query($con,$sql_total) or die("fail query");
         $total_record = mysqli_num_rows($record);
         $total_links = ceil($total_record/$limit_per_page);
@@ -252,21 +197,15 @@ if($action == 'show'){
         <thead>
         <tr>
             <th width="7%;">စဉ်</th>
-            <th>Date</th>                                        
-            <th>VNO</th>
-            <th>Customer</th>
-            <th class="text-right">စုစုပေါင်း</th>                                                                             
-            <th>Disc</th>
-            <th>Tax</th>
-            <th class="text-right">စုစုပေါင်း</th>  
-            <th class="text-right">Cash</th>  
-            <th class="text-right">Refund</th>  
-            <th>Cashier</th>          
+            <th>Quotation Title</th>                                        
+            <th>Project Name</th>
+            <th>Name</th>
+            <th>Date</th>        
         </tr>
         </thead>
         <tbody>
             <tr>
-                <td colspan="12" class="text-center">No data</td>
+                <td colspan="5" class="text-center">No data</td>
             </tr>
             </tbody>
         </table>
@@ -276,155 +215,157 @@ if($action == 'show'){
 }
 
 if($action == 'view'){
-    $vno = $_POST["vno"];
-    echo print_voucher($vno);
+    $aid = $_POST["aid"];
+    $createquotationid = $_POST["createquotationid"];
+    printVoucher($createquotationid,$userid);
 }
 
 if($action == 'edit'){
-    $vno = $_POST["vno"];
-    $customerid = $_POST["customerid"];
-    $customername = $_POST["customername"];
-    $totalamt = $_POST["totalamt"];
-    $totalqty = $_POST["totalqty"];
-    $userid = $_SESSION["naiip_userid"];
-    $chk = $_POST["chk"];
-
-    $sql_temp = 'insert into tblsale_temp (RemainID,CodeNo,ItemName,Qty,SellPrice,UserID) 
-    select RemainID,CodeNo,ItemName,Qty,SellPrice,"'.$userid.'"  
-    from tblsale where VNO="'.$vno.'"';
-    if(mysqli_query($con,$sql_temp)){
-        $_SESSION["editcustomerid"] = $customerid;
-        $_SESSION["editcustomername"] = $customername;
-        $_SESSION["editsalevno"] = $vno; 
-        $_SESSION["editsalechk"] = $chk; 
-        echo 1;
-    }else{
-        echo 0;
-    }
+    $aid = $_POST["aid"];
+    $createquotationid = $_POST["createquotationid"];
+    $_SESSION["edit_createquotationaid"] = $createquotationid;
+    echo 1;
 }
 
 if($action == 'delete'){
-    $vno = $_POST["vno"];
-    $sqlsale="select * from tblsale where VNO='{$vno}'";
-    $result=mysqli_query($con,$sqlsale);
-    if(mysqli_num_rows($result)>0){
-        while( $rowqty = mysqli_fetch_array($result)){      
-       
-            $sqlremain="select Qty from tblremain where CodeNo='{$rowqty['CodeNo']}'";
-            $result1=mysqli_query($con,$sqlremain);
-            $rowqty1 = mysqli_fetch_array($result1);
-            $newqty=$rowqty['Qty']+$rowqty1['Qty'];
-
-            $sqlremain1="update tblremain set Qty={$newqty} where CodeNo='{$rowqty['CodeNo']}'";
-            mysqli_query($con,$sqlremain1);
+    $aid = $_POST["aid"];
+    $createquotationid = $_POST["createquotationid"];
+    //delete quotationsell
+    $whereone = [
+        "CreatequotationID" => $createquotationid,
+        "UserID" => $userid
+    ];
+    $resone = deleteData_Fun("tblquotation",$whereone);
+    if($resone){
+        //delete quotationvoucher
+        $wheretwo = [
+            "AID" => $aid
+        ];
+        $restwo = deleteData_Fun("tblquotationvoucher",$wheretwo);
+        if($restwo){
+            save_log($_SESSION["naiip_username"]." သည် Quotation Voucher အားဖျက်သွားသည်။");
+            echo 1;
         }
-
-        $sqldel1 ="delete from tblsale where VNO='{$vno}'";       
-        mysqli_query($con,$sqldel1);
-        $sqldel2= "delete from tblvoucher where VNO='{$vno}'";
-        mysqli_query($con,$sqldel2);
-
-        save_log($_SESSION["naiip_username"]." သည် vno: ".$vno." ၏ cash အရောင်းစာရင်းအားဖျက်သွားသည်။");
-        echo 1;
-    }else{
+        else{
+            echo 0;
+        }
+    }
+    else{
         echo 0;
     }
 }
 
 if($action == 'excel'){
     $search = $_POST['ser'];
-    $a = "";
-    if($search != ''){  
-        $a = " and (v.VNO like '%$search%' or c.Name like '%$search%' or u.UserName like '%$search%') ";
-    } 
+    $a = ""; 
     $from=$_POST['hfrom'];  
     $to=$_POST['hto'];     
-    $customer=$_POST['hcustomer'];   
-    $b="";
-    $c="";
+    $quotation=$_POST['hquotation'];
+    if($search != ''){  
+        $a .= " AND (c.Title like '%$search%') ";
+    }
     if($from!='' || $to!=''){
-        $b=" and Date(v.Date)>='{$from}' and Date(v.Date)<='{$to}' ";
+        $a .=" and Date(q.Date)>='{$from}' and Date(q.Date)<='{$to}' ";
     }  
-    if($customer!=''){
-        $c=" and v.CustomerID={$customer} ";
+    if($quotation!=''){
+        $a .=" and q.CreatequotationID={$quotation} ";
     }   
-    $sql="select v.*,Date(v.Date) as vdate,c.Name,u.UserName 
-    from tblvoucher v,tblcustomer c,tbluser u 
-    where v.UserID=u.AID and v.CustomerID=c.AID and v.Chk='Cash' ".$b.$c.$a." 
-    order by AID desc ";
+    $sql="SELECT q.*,c.AID AS caid,c.Title AS ctitle,p.Name AS projectname FROM tblquotationvoucher q,
+    tblcreatequotation c,tblproject p WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID AND 
+    q.UserID='{$userid}' ".$a." ORDER BY q.AID DESC";
     $result = mysqli_query($con,$sql);
     $out="";
-    $fileName = "SaleReport-".date('d-m-Y').".xls";
+    $fileName = "QuotationVoucherList-".date('d-m-Y').".xls";
+    $out .= '<head><meta charset="utf-8"></head>
+            <table >  
+                <tr>
+                    <td colspan="5" align="center"><h3>QuotationVoucherList</h3></td>
+                </tr>
+                <tr><td colspan="5"><td></tr>
+                <tr>  
+                    <th style="border: 1px solid ;">No</th>  
+                    <th style="border: 1px solid ;">Quotation Title</th>                                        
+                    <th style="border: 1px solid ;">Project Name</th>
+                    <th style="border: 1px solid ;">Name</th>
+                    <th style="border: 1px solid ;">Date</th>   
+                </tr>';
     if(mysqli_num_rows($result) > 0){
-        $out .= '<head><meta charset="utf-8"></head>
-        <table >  
-            <tr>
-                <td colspan="11" align="center"><h3>Cash Report</h3></td>
-            </tr>
-            <tr><td colspan="11"><td></tr>
-            <tr>  
-                <th style="border: 1px solid ;">No</th>  
-                <th style="border: 1px solid ;">VNO</th>  
-                <th style="border: 1px solid ;">Customer</th>  
-                <th style="border: 1px solid ;">TotalQty</th>
-                <th style="border: 1px solid ;">Discount</th>  
-                <th style="border: 1px solid ;">Tax</th>  
-                <th style="border: 1px solid ;">TotalAmt</th>
-                <th style="border: 1px solid ;">Cash</th>
-                <th style="border: 1px solid ;">Refund</th>
-                <th style="border: 1px solid ;">Cashier</th>  
-                <th style="border: 1px solid ;">Date</th>  
-            </tr>';
         $no=0;
         while($row = mysqli_fetch_array($result)){
             $no = $no + 1;
             $out .= '
                 <tr>  
                     <td style="border: 1px solid ;">'.$no.'</td>  
-                    <td style="border: 1px solid ;">'.$row["VNO"].'</td>  
-                    <td style="border: 1px solid ;">'.$row["Name"].'</td>  
-                    <td style="border: 1px solid ;">'.$row["TotalQty"].'</td>
-                    <td style="border: 1px solid ;">'.$row["Dis"].'</td>  
-                    <td style="border: 1px solid ;">'.$row["Tax"].'</td>  
-                    <td style="border: 1px solid ;">'.number_format($row["Total"]).'</td>
-                    <td style="border: 1px solid ;">'.number_format($row["Cash"]).'</td>
-                    <td style="border: 1px solid ;">'.number_format($row["Refund"]).'</td>
-                    <td style="border: 1px solid ;">'.$row["UserName"].'</td>  
-                    <td style="border: 1px solid ;">'.enDate($row["vdate"]).'</td>     
+                    <td style="border: 1px solid ;">'.$row["ctitle"].'</td>  
+                    <td style="border: 1px solid ;">'.$row["projectname"].'</td>  
+                    <td style="border: 1px solid ;">'.$row["Name"].'</td>
+                    <td style="border: 1px solid ;">'.enDate($row["Date"]).'</td>     
                 </tr>';
         }
-        $out .= '</table>';
-        header('Content-Type: application/xls');
-        header('Content-Disposition: attachment; filename='.$fileName);
-        echo $out;
-    }else{
-        $out .= '<head><meta charset="utf-8"></head>
-        <table >  
+    }
+    else{
+        $out .= '
             <tr>
-                <td colspan="11" align="center"><h3>Cash Report</h3></td>
-            </tr>
-            <tr><td colspan="11"><td></tr>
-            <tr>  
-                <th style="border: 1px solid ;">No</th>  
-                <th style="border: 1px solid ;">VNO</th>  
-                <th style="border: 1px solid ;">Customer</th>  
-                <th style="border: 1px solid ;">TotalQty</th>
-                <th style="border: 1px solid ;">Discount</th>  
-                <th style="border: 1px solid ;">Tax</th>  
-                <th style="border: 1px solid ;">TotalAmt</th>
-                <th style="border: 1px solid ;">Cash</th>
-                <th style="border: 1px solid ;">Refund</th>
-                <th style="border: 1px solid ;">Cashier</th>  
-                <th style="border: 1px solid ;">Date</th>  
-            </tr>
-            <tr>
-                <td colspan="11" style="border: 1px solid ;" align="center">No data</td>
+                <td colspan="5" style="border: 1px solid ;" align="center">No data</td>
             </tr>';
-        $out .= '</table>';
-        header('Content-Type: application/xls');
-        header('Content-Disposition: attachment; filename='.$fileName);
-        echo $out;
-    }   
+    } 
+    $out .= '</table>';
+    header('Content-Type: application/xls');
+    header('Content-Disposition: attachment; filename='.$fileName);
+    echo $out;  
+    
+}
+
+if($action == 'excelquotation'){
+    $voucheraid = $_POST["voucheraid"];
+    $vcreatequotationid = $_POST["vcreatequotationid"];
+    $sql="SELECT q.*,c.Title as title FROM tblquotation q,tblcreatequotation c WHERE 
+    q.CreatequotationID=c.AID AND q.CreatequotationID = '{$vcreatequotationid}' AND 
+    q.UserID='{$userid}' ORDER BY q.AID DESC";
+    $result = mysqli_query($con,$sql);
+    $out="";
+    $fileName = "QuotationList-".date('d-m-Y').".xls";
+    $out .= '<head><meta charset="utf-8"></head>
+            <table >  
+                <tr>
+                    <td colspan="7" align="center"><h3>QuotationList</h3></td>
+                </tr>
+                <tr><td colspan="7"><td></tr>
+                <tr>  
+                    <th style="border: 1px solid ;">No</th>  
+                    <th style="border: 1px solid ;">Quotation Title</th>                                        
+                    <th style="border: 1px solid ;">Item Name</th>
+                    <th style="border: 1px solid ;">Specification</th>
+                    <th style="border: 1px solid ;">Qty</th>   
+                    <th style="border: 1px solid ;">Unit Price</th>   
+                    <th style="border: 1px solid ;">Total Price</th>   
+                </tr>';
+    if(mysqli_num_rows($result) > 0){
+        $no=0;
+        while($row = mysqli_fetch_array($result)){
+            $no = $no + 1;
+            $out .= '
+                <tr>  
+                    <td style="border: 1px solid ;">'.$no.'</td>  
+                    <td style="border: 1px solid ;">'.$row["title"].'</td>  
+                    <td style="border: 1px solid ;">'.$row["ItemName"].'</td>  
+                    <td style="border: 1px solid ;">'.$row["Specification"].'</td>
+                    <td style="border: 1px solid ;">'.number_format($row["Qty"]).'</td>    
+                    <td style="border: 1px solid ;">'.number_format($row["UnitPrice"]).'</td>  
+                    <td style="border: 1px solid ;">'.number_format($row["TotalPrice"]).'</td>   
+                </tr>';
+        }
+    }
+    else{
+        $out .= '
+            <tr>
+                <td colspan="7" style="border: 1px solid ;" align="center">No data</td>
+            </tr>';
+    } 
+    $out .= '</table>';
+    header('Content-Type: application/xls');
+    header('Content-Disposition: attachment; filename='.$fileName);
+    echo $out;  
     
 }
 

@@ -52,7 +52,7 @@ if($action == 'show'){
 
 if($action == "goquotation"){
     $aid = $_POST["aid"];
-    $_SESSION["quotationaid"] = $aid;
+    $_SESSION["createquotationaid"] = $aid;
     echo 1;
 }
 

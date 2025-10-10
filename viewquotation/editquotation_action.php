@@ -5,7 +5,7 @@ $action = $_POST["action"];
 $userid = $_SESSION["naiip_userid"];
 
 if($action == 'show'){
-    $aid = $_SESSION["createquotationaid"];
+    $aid = $_SESSION["edit_createquotationaid"];
     $sql="SELECT q.*,c.Title AS title,g.Name AS categoryname FROM tblquotation q,tblcreatequotation c,tblcategory g 
     WHERE q.CreatequotationID=c.AID AND q.CategoryID=g.AID AND q.CreatequotationID='{$aid}' AND q.UserID='{$userid}' 
     ORDER BY q.AID DESC";
@@ -107,7 +107,7 @@ if($action == 'show'){
 }
 
 if($action == "save"){
-    $createquotationid = $_SESSION["createquotationaid"];
+    $createquotationid = $_SESSION["edit_createquotationaid"];
     $categoryid = $_POST["categoryid"];
     $itemname = $_POST["itemname"];
     $specification = $_POST["specification"];
@@ -187,30 +187,8 @@ if($action == "delete"){
     }
 }
 
-if($action == "savevoucher"){
-    $createquotationid = $_SESSION["createquotationaid"];
-    $projectid = $_POST["projectid"];
-    $name = $_POST["name"];
-    $dt = $_POST["dt"];
-    $data = [
-        "CreatequotationID" => $createquotationid,
-        "ProjectID" => $projectid,
-        "Name" => $name,
-        "Date" => $dt,
-        "UserID" => $userid
-    ];  
-    $result = insertData_Fun("tblquotationvoucher",$data);
-    if($result){
-        save_log($_SESSION["naiip_username"]." သည် Quotation Voucher တစ်စောင်အားအသစ်သွင်းသွားသည်။");
-        echo 1;
-    }
-    else{
-        echo 0;
-    }
-}
-
 if($action == "editvoucher"){
-    $createquotationid = $_SESSION["createquotationaid"];
+    $createquotationid = $_SESSION["edit_createquotationaid"];
     $aid = $_POST["eaid"];
     $projectid = $_POST["eprojectid"];
     $name = $_POST["ename"];

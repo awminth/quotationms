@@ -2,7 +2,7 @@
     include('../config.php');
     include(root.'master/header.php');
     $userid = $_SESSION["naiip_userid"];
-    $createquotationid = isset($_SESSION["createquotationaid"]) ? $_SESSION["createquotationaid"] : 0;
+    $edit_createquotationid = isset($_SESSION["edit_createquotationaid"]) ? $_SESSION["edit_createquotationaid"] : 0;
 
     $eaid = 0;
     $name_project = "projectid";
@@ -15,8 +15,8 @@
     $actionvoucher = "savevoucher";
     $voucherclass = "save";
     $btnvoucher = "Save";
-    //For Edit from Dashboard
-    $sql = "SELECT * FROM tblquotationvoucher WHERE CreatequotationID='$createquotationid' AND UserID='{$userid}'";
+    //For Edit from ViewQuotation
+    $sql = "SELECT * FROM tblquotationvoucher WHERE CreatequotationID='$edit_createquotationid' AND UserID='{$userid}'";
     $result = mysqli_query($con,$sql);
     if(mysqli_num_rows($result)){
         $row = mysqli_fetch_array($result);
@@ -42,7 +42,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-12">
-                    <h1>Create Quotation</h1>
+                    <h1>Edit Quotation</h1>
                 </div>
             </div>
         </div><!-- /.container-fluid -->
@@ -247,7 +247,7 @@
 <?php include(root.'master/footer.php'); ?>
 
 <script>
-var ajax_url = "<?php echo roothtml.'home/quotation_action.php'; ?>";
+var ajax_url = "<?php echo roothtml.'viewquotation/editquotation_action.php'; ?>";
 
 $(document).ready(function() {
 
@@ -393,30 +393,6 @@ $(document).ready(function() {
             }
         });
 
-    });
-
-    $("#frmsavevoucher").on("submit", function(e) {
-        e.preventDefault();
-        var formData = new FormData(this);
-        $.ajax({
-            type: "post",
-            url: ajax_url,
-            data: formData,
-            contentType: false,
-            processData: false,
-            global: false,
-            success: function(data) {
-                if (data != 0) {
-                    swal("Successful",
-                        "Save data success.",
-                        "success");
-                    swal.close();
-                    window.location.href = "<?= roothtml.'viewquotation/viewquotation.php'?>";
-                } else {
-                    swal("Error", "Save Data Error.", "Error");
-                }
-            }
-        });
     });
 
     $("#frmeditvoucher").on("submit", function(e) {

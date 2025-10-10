@@ -39,6 +39,7 @@ if($action == 'show'){
             <th width="7%;">No</th>
             <th>Title</th>
             <th>Remark</th>
+            <th>Status</th>
             <th class="text-center">Date</th>
             <th width="10%;" class="text-center">Action</th>           
         </tr>
@@ -49,11 +50,14 @@ if($action == 'show'){
         while($row = mysqli_fetch_array($result)){
             $no=$no+1;
             $colour = "";
+            $status = "";
             $colour = $row["Status"] == "1" ? "success" : "warning";
+            $status = $row["Status"] == "1" ? "Active" : "Unactive";
             $out.="<tr>
                 <td>{$no}</td>
-                <td><span class='badge badge-".$colour."' style='font-size: 14px; padding: 8px 12px;'>{$row["Title"]}</span></td>  
-                <td><span class='badge badge-".$colour."' style='font-size: 14px; padding: 8px 12px;'>{$row["Remark"]}</span></td>  
+                <td>{$row["Title"]}</td>  
+                <td>{$row["Remark"]}</td>
+                <td><span class='badge badge-".$colour."' style='font-size: 14px; padding: 8px 12px;'>{$status}</span></td>  
                 <td class='text-center'><span class='badge badge-info' style='font-size: 12px; padding: 6px 10px;'>".enDate($row["Date"])."</span></td>  
                 <td class='text-center'>
                     <div class='dropdown dropleft'>

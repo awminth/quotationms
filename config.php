@@ -91,6 +91,17 @@ function load_category(){
     return $out;
 }
 
+function load_quotation(){
+    global $con;
+    $sql="select * from tblcreatequotation";
+    $result=mysqli_query($con,$sql) or die("Query fail.");
+    $out="";
+    while($row = mysqli_fetch_array($result)){
+        $out.="<option value='{$row["AID"]}'>{$row["Title"]}</option>";
+    }
+    return $out;
+}
+
 function load_project($selected_id = 0){
     global $con;
     $sql="select * from tblproject";
@@ -387,10 +398,11 @@ function deleteData_Fun($table, $where) {
     }    
 }
 
-function printVoucher($createquotationid){
+function printVoucher($createquotationid,$userid){
     global $con;
-    $sql = "SELECT q.*,c.Title as title FROM tblquotation q,tblcreatequotation c WHERE q.CreatequotationID=c.AID AND 
-    q.CreatequotationID = '{$createquotationid}' ORDER BY q.AID DESC";
+    $sql = "SELECT q.*,c.Title as title FROM tblquotation q,tblcreatequotation c WHERE 
+    q.CreatequotationID=c.AID AND q.CreatequotationID = '{$createquotationid}' AND 
+    q.UserID='{$userid}' ORDER BY q.AID DESC";
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     if(mysqli_num_rows($result) > 0){
         $row = mysqli_fetch_array($result);

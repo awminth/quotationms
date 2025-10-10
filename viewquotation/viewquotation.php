@@ -33,22 +33,22 @@ include(root.'master/header.php');
 
                             </div>
                             <div class="form-group">
-                                <label>User</label>
-                                <select class="form-control select2" name="customer">
-                                    <option value="">Select User</option>
-                                    
+                                <label>QuotationTitle</label>
+                                <select class="form-control select2" name="quotationid">
+                                    <option value="">Select Title</option>
+                                    <?=load_quotation()?>
                                 </select>
-                            </div>                            
+                            </div>
                             <div class="form-group">
                                 <button type="submit" id="btnsearch" class="form-control btn btn-sm btn-<?=$color?>"><i
                                         class="fas fa-search"></i>&nbsp;Search</button>
                             </div>
-                            <form method="POST" action="cashsell_action.php">
+                            <form method="POST" action="viewquotation_action.php">
                                 <input type="hidden" name="hid">
                                 <input type="hidden" name="ser">
                                 <input type="hidden" name="hfrom">
                                 <input type="hidden" name="hto">
-                                <input type="hidden" name="hcustomer">
+                                <input type="hidden" name="hquotation">
                                 <button type="submit" name="action" value="excel"
                                     class="form-control btn btn-sm btn-<?=$color?>"><i
                                         class="fas fa-file-excel"></i>&nbsp;Excel</button>
@@ -101,23 +101,29 @@ include(root.'master/header.php');
 </div>
 <!-- /.content-wrapper -->
 
-<!-- new Modal -->
-<div class="modal fade" id="modalviewsell">
-    <div class="modal-dialog modal-dialog-centered">
+<!-- voucher Modal -->
+<div class="modal fade text-left" id="vouchermodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel25"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header bg-<?=$color?>">
-                <h4 class="modal-title">အရောင်းစာရင်း</h4>
-                <div class="float-right m-2">
-                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-                    <a id="btnprintsell" class="text-white" style="float:right;"><i class="fas fa-print"
-                            style="font-size:20px;"></i></a>
-                </div>
+            <div class="modal-header bg-primary m-1">
+                <label class="modal-title text-text-bold-600" id="myModalLabel25">Quotation Print</label>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="btnpayclose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <div id="printviewsell" class="container">
+            <form id="frmvoucher" method="POST">
+                <input type="hidden" name="action" value="viewvoucher" />
+                <input type="hidden" name="voucheraid"/>
+                <input type="hidden" name="vcreatequotationid"/>
+                <div id="printdata" class="container">
 
-            </div>
-            <br><br>
+                </div>
+                <div class="d-flex justify-content-end m-2">
+                    <button class='btn btn-success mr-2' id='btnexcel'>Excel</button>
+                    <button class='btn btn-primary' id='btnprint'>Print</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -125,9 +131,10 @@ include(root.'master/header.php');
 <?php include(root.'master/footer.php'); ?>
 
 <script>
+var ajax_url = "<?php echo roothtml.'viewquotation/viewquotation_action.php'; ?>";
 $(document).ready(function() {
     //print js fun
-    function print_fun(place){
+    function print_fun(place) {
         printJS({
             printable: place,
             type: 'html',
@@ -144,15 +151,15 @@ $(document).ready(function() {
         });
     }
 
-    function load_pag(page) {
+    function load_page(page) {
         var entryvalue = $("[name='hid']").val();
         var search = $("[name='ser']").val();
         var from = $("[name='hfrom']").val();
         var to = $("[name='hto']").val();
-        var customer = $("[name='hcustomer']").val();
+        var quotation = $("[name='hquotation']").val();
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'sell/cashsell_action.php' ?>",
+            url: ajax_url,
             data: {
                 action: 'show',
                 page_no: page,
@@ -160,121 +167,126 @@ $(document).ready(function() {
                 search: search,
                 from: from,
                 to: to,
-                customer: customer
+                quotation: quotation
             },
             success: function(data) {
                 $("#show_table").html(data);
             }
         });
     }
-    load_pag();
+    load_page();
 
     $(document).on('click', '.page-link', function() {
         var pageid = $(this).data('page_number');
-        load_pag(pageid);
+        load_page(pageid);
     });
 
     $(document).on("change", "#entry", function() {
         var entryvalue = $(this).val();
         $("[name='hid']").val(entryvalue);
-        load_pag();
+        load_page();
     });
 
 
     $(document).on("keyup", "#searching", function() {
         var serdata = $(this).val();
         $("[name='ser']").val(serdata);
-        load_pag();
+        load_page();
     });
 
     $(document).on("click", "#btnsearch", function() {
         var from = $("[name='from']").val();
         var to = $("[name='to']").val();
-        var customer = $("[name='customer']").val();
+        var quotationid = $("[name='quotationid']").val();
         $("[name='hfrom']").val(from);
         $("[name='hto']").val(to);
-        $("[name='hcustomer']").val(customer);
-        load_pag();
+        $("[name='hquotation']").val(quotationid);
+        load_page();
     });
 
-    $(document).on("click", "#viewsell", function() {
-        var vno = $(this).data("vno");
-        var customerid = $(this).data("customerid");
-        var cusname = $(this).data("cusname");
-        var userid = $(this).data("userid");
-        var date = $(this).data("date");
-        var totalamt = $(this).data("totalamt");
-        var total = $(this).data("total");
-        var dis = $(this).data("dis");
-        var tax = $(this).data("tax");
-        var cash = $(this).data("cash");
-        var refund = $(this).data("refund");
-        var credit = $(this).data("credit");
-        var chk = $(this).data("chk");
+    $(document).on("click", "#btnprint", function(e) {
+        e.preventDefault();
+        print_fun("printdata");
+    });
+
+    $(document).on("click", "#btnview", function() {
+        var aid = $(this).data("aid");
+        var createquotationid = $(this).data("createquotationid");
+        $("[name='voucheraid']").val(aid);
+        $("[name='vcreatequotationid']").val(createquotationid);
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'sell/cashsell_action.php' ?>",
+            url: ajax_url,
             data: {
                 action: 'view',
-                vno: vno,
-                customerid: customerid,
-                userid: userid,
-                date: date,
-                totalamt: totalamt,
-                total: total,
-                dis: dis,
-                tax: tax,
-                cash: cash,
-                refund: refund,
-                cusname: cusname,
-                credit: credit,
-                chk: chk
+                aid: aid,
+                createquotationid: createquotationid
             },
             success: function(data) {
-                $("#printviewsell").html(data);
-                $("#modalviewsell").modal("show");
+                $("#printdata").html(data);
+                $("#vouchermodal").modal("show");
             }
         });
     });
 
-    $(document).on("click", "#btnprintsell", function(e) {
+    $(document).on("click", "#btnexcel", function(e) {
         e.preventDefault();
-        print_fun("printviewsell");
+        var voucheraid = $("[name='voucheraid']").val();
+        var vcreatequotationid = $("[name='vcreatequotationid']").val();
+        if (!vcreatequotationid) {
+            swal("Information", "Please open a voucher first.", "info");
+            return;
+        }
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "<?php echo roothtml.'viewquotation/viewquotation_action.php'; ?>";
+        var actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'action';
+        actionInput.value = 'excelquotation';
+        form.appendChild(actionInput);
+        var aidInput = document.createElement('input');
+        aidInput.type = 'hidden';
+        aidInput.name = 'voucheraid';
+        aidInput.value = voucheraid || '';
+        form.appendChild(aidInput);
+        var cqidInput = document.createElement('input');
+        cqidInput.type = 'hidden';
+        cqidInput.name = 'vcreatequotationid';
+        cqidInput.value = vcreatequotationid;
+        form.appendChild(cqidInput);
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
     });
 
-    $(document).on("click", "#editsell", function() {
-        var vno = $(this).data("vno");
-        var customerid = $(this).data("customerid");
-        var customername = $(this).data("customername");
-        var totalamt = $(this).data("totalamt");
-        var totalqty = $(this).data("totalqty");
-        var chk = $(this).data("chk");
+    $(document).on("click", "#btnedit", function() {
+        var aid = $(this).data("aid");
+        var createquotationid = $(this).data("createquotationid");
         $.ajax({
             type: "post",
-            url: "<?php echo roothtml.'sell/cashsell_action.php' ?>",
+            url: ajax_url,
             data: {
                 action: 'edit',
-                vno: vno,
-                customerid: customerid,
-                customername: customername,
-                totalqty: totalqty,
-                totalamt: totalamt,
-                chk: chk
+                aid: aid,
+                createquotationid: createquotationid
             },
             success: function(data) {
-                if(data == 1){
-                    location.href = "<?=roothtml.'pos/pos.php?key=kill'?>";
-                }else{
-                    swal("Error","Error","error");
+                if (data == 1) {
+                    window.location.href =
+                        "<?= roothtml.'viewquotation/editquotation.php'?>";
+                } else {
+                    swal("Error", "Error", "error");
                 }
             }
         });
 
     });
 
-    $(document).on("click", "#deletesell", function(e) {
+    $(document).on("click", "#btndelete", function(e) {
         e.preventDefault();
-        var vno = $(this).data("vno");
+        var aid = $(this).data("aid");
+        var createquotationid = $(this).data("createquotationid");
         swal({
                 title: "Delete?",
                 text: "Are you sure delete!",
@@ -287,17 +299,18 @@ $(document).ready(function() {
             function() {
                 $.ajax({
                     type: "post",
-                    url: "<?php echo roothtml.'sell/cashsell_action.php'; ?>",
+                    url: ajax_url,
                     data: {
                         action: 'delete',
-                        vno: vno
+                        aid: aid,
+                        createquotationid: createquotationid
                     },
                     success: function(data) {
                         if (data == 1) {
                             swal("Successful",
                                 "Delete data success.",
                                 "success");
-                            load_pag();
+                            load_page();
                             swal.close();
                         } else {
                             swal("Error",
@@ -308,9 +321,6 @@ $(document).ready(function() {
                 });
             });
     });
-
-
-
 
 });
 </script>

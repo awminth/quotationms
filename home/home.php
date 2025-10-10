@@ -1,6 +1,6 @@
 <?php
-include('../config.php');
-include(root . 'master/header.php');
+    include('../config.php');
+    include(root . 'master/header.php');
 ?>
 
 <!-- Content Wrapper. Contains page content -->
