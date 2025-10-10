@@ -197,7 +197,7 @@ include('config.php');
                         // Redirect after a short delay to show the success message
                         setTimeout(function() {
                             location.href =
-                                "<?php echo roothtml . 'setting/usercontrol.php' ?>";
+                                "<?php echo roothtml . 'home/home.php' ?>";
                         }, 1000);
                     } else {
                         swal("Error!",

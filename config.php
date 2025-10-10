@@ -86,40 +86,19 @@ function load_category(){
     $result=mysqli_query($con,$sql) or die("Query fail.");
     $out="";
     while($row = mysqli_fetch_array($result)){
-        $out.="<option value='{$row["AID"]}'>{$row["Category"]}</option>";
-    }
-    return $out;
-}
-
-function load_itemname(){
-    global $con;
-    $sql="select CodeNo,ItemName from tblremain";
-    $result=mysqli_query($con,$sql) or die("Query fail.");
-    $out="";
-    while($row = mysqli_fetch_array($result)){
-        $out.="<option value='{$row["CodeNo"]}'>{$row["ItemName"]}</option>";
-    }
-    return $out;
-}
-
-function load_supplier(){
-    global $con;
-    $sql="select * from tblsupplier";
-    $result=mysqli_query($con,$sql) or die("Query fail.");
-    $out="";
-    while($row = mysqli_fetch_array($result)){
-        $out.="<option value='{$row["AID"]}'>{$row["Supplier"]}</option>";
-    }
-    return $out;
-}
-
-function load_customer(){
-    global $con;
-    $sql="select * from tblcustomer";
-    $result=mysqli_query($con,$sql) or die("Query fail.");
-    $out="";
-    while($row = mysqli_fetch_array($result)){
         $out.="<option value='{$row["AID"]}'>{$row["Name"]}</option>";
+    }
+    return $out;
+}
+
+function load_project($selected_id = 0){
+    global $con;
+    $sql="select * from tblproject";
+    $result=mysqli_query($con,$sql) or die("Query fail.");
+    $out="";
+    while($row = mysqli_fetch_array($result)){
+        $selected = ($row["AID"] == $selected_id) ? "selected" : "";
+        $out.="<option value='{$row["AID"]}' {$selected}>{$row["Name"]}</option>";
     }
     return $out;
 }
@@ -244,107 +223,6 @@ function control_downloadlink($file_path){
     header('Content-Disposition: attachment; filename="'.basename($path).'"');   
     readfile($path); 
     exit();
-}
-
-function print_voucher($vno){
-    $sqlvoucher="select v.*,c.Name,u.UserName from tblvoucher v, tblcustomer c,tbluser u where v.CustomerID = c.AID and v.UserID=u.AID and VNO='{$vno}'";
-    global $con;
-    $resultvoucher=mysqli_query($con,$sqlvoucher) or die("Query fail.");
-    $rowvoucher = mysqli_fetch_array($resultvoucher);
-    if(mysqli_num_rows($resultvoucher) > 0){
-        $customerid = $rowvoucher["CustomerID"];
-        $cusname = $rowvoucher["Name"];
-        $userid = $rowvoucher["UserID"];
-        $date = $rowvoucher["Date"];
-        $totalamt = $rowvoucher["TotalAmt"];
-        $total = $rowvoucher["Total"];
-        $dis = $rowvoucher["Dis"];
-        $tax = $rowvoucher["Tax"];
-        $cash = $rowvoucher["Cash"];
-        $chk= $rowvoucher["Chk"];
-    }
-
-    $txt1 = "";
-    $txt2 = 0;
-    $str = "";
-    if($chk == "Cash"){
-        $txt1 = "ပြန်အမ်းငွေ";
-        $txt2 = $rowvoucher["Refund"];
-        $str = "Cash";
-    }else if($chk == "Credit"){
-        $txt1 = "Credit";
-        $txt2 = $rowvoucher["Credit"];
-        $str = "Pay";
-    }else if($chk == "Return"){
-        $txt1 = "";
-        $txt2 = "";
-        $str = "Return Amt";
-    }
-    $sellname=$rowvoucher["UserName"];   
-    
-    $out = "";    
-    $out="<h5 class='text-center p-2' style='font-size: 2.5rem;font-weight:bold;'>{$_SESSION['shopname']}</h5>
-    <div align='center'><img src='".roothtml."lib/images/logo2.jpg' style='width: 250px;height:150px;'></img></div>
-    <p class='text-center txt'>{$_SESSION['shopaddress']}<br>
-    {$_SESSION['shopphno']}<br>
-    <hr>
-    <p class='txtl fs'>
-        Date :  ".enDate($date)."<br>
-        VoucherNo : {$vno}<br>
-        Customer Name: {$cusname}<br>
-        Cashier : {$sellname}<br>
-    </p>
-    <table class='table table-bordered text-sm' frame=hsides rules=rows width='100%'>
-        <tr>
-            <th class='txtl'>ItemName</th>
-            <th class='text-center txtc'>Qty</th>
-            <th class='text-right txtr'>Price</th>
-            <th class='text-right txtr'>Total</th>
-        </tr>
-    ";
-    $sql = "select * from tblsale where VNO='{$vno}'";
-    $result = mysqli_query($con,$sql);
-    if(mysqli_num_rows($result) > 0){
-        while($row = mysqli_fetch_array($result)){
-            $out.="                    
-            <tr>
-                <td>{$row['ItemName']}</td>
-                <td class='text-center txtc'>{$row['Qty']}</td>
-                <td class='text-right txtr'>".number_format($row['SellPrice'])."</td>";
-                $printtotal=$row['Qty']*$row['SellPrice'];
-                $out.="<td class='text-right txtr'>".number_format($printtotal)."</td>
-            </tr>                    
-            ";
-        }
-    $out.="
-        <tr class='text-right txtr'>
-            <td colspan='3'>
-                Total<br>
-                Discount:<br>
-                Tax:<br>
-                SubTotal:<br>
-                {$str}:<br>
-                {$txt1}
-            </td>
-            <td>
-                ".number_format($totalamt)."<br>
-                {$dis}<br>
-                {$tax}<br>
-                ".number_format($total)."<br>
-                ".number_format($cash)."<br>
-                ".$txt2."
-            </td>
-        </tr>                             
-        <tr class='text-center txtc'>
-            <td colspan='4'>---Thank You---</td>   
-        </tr>
-        </table>
-        ";            
-        echo $out;
-    }else{
-        echo "<p>No Record</p>";
-    }
-   
 }
 
 function insertData_Fun($table, $data) {
@@ -509,71 +387,44 @@ function deleteData_Fun($table, $where) {
     }    
 }
 
-function printVoucher($vno){
+function printVoucher($createquotationid){
     global $con;
-    $sql = "SELECT s.*,v.*,c.Name as CustomerName FROM tblpreordervoucher v,tblpreordersale s,tblcustomer c WHERE v.VNO = s.VNO AND v.VNO='{$vno}' AND c.AID = v.CustomerID";
+    $sql = "SELECT q.*,c.Title as title FROM tblquotation q,tblcreatequotation c WHERE q.CreatequotationID=c.AID AND 
+    q.CreatequotationID = '{$createquotationid}' ORDER BY q.AID DESC";
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     if(mysqli_num_rows($result) > 0){
-        $voucher_row = mysqli_fetch_array($result);
+        $row = mysqli_fetch_array($result);
         $out = "";
         $out .= "
-            <h5 class='text-center' style='font-size: 2.5rem; font-weight: bold;'>{$_SESSION['shopname']}</h5>
-            <div align='center'><img src='".roothtml."lib/images/logo2.jpg' style='width: 200px;height:auto;'></img></div>
-            <p class='text-center txt'>{$_SESSION['shopaddress']}<br>
-            {$_SESSION['shopphno']}<br>
+            <h5 class='text-center' style='font-size: 1.5rem; font-weight: bold;'>{$row['title']}</h5>
             <hr>
             <p class='txtl fs'>
-                Date : ".$voucher_row["Date"]."<br>
-                VoucherNo : ".$voucher_row["VNO"]."<br>
-                Customer Name: ".$voucher_row["CustomerName"]."<br>
-                Cashier : {$_SESSION['naiip_username']}<br>
+                Date : ".$row["Date"]."<br>
             </p>
             <table class='table table-bordered text-sm' frame=hsides rules=rows width='100%'>
                 <tr>
-                    <th class='txtl'>Item Code</th>
                     <th class='txtl'>ItemName</th>
-                    <th class='text-center txtc'>Qty</th>
-                    <th class='text-right txtr'>Price</th>
-                    <th class='text-right txtr'>Total</th>
+                    <th class='text-center txtc'>Specification</th>
+                    <th class='text-right txtr'>Qty</th>
+                    <th class='text-right txtr'>Unit Price</th>
+                    <th class='text-right txtr'>Total Price</th>
                 </tr>";
             // Reset the result pointer to the beginning
             mysqli_data_seek($result, 0);
             while($row = mysqli_fetch_array($result)){
                 $out .= "
                 <tr>
-                    <td>{$row['CodeNo']}</td>
                     <td>{$row['ItemName']}</td>
-                    <td class='text-center txtc'>{$row['Qty']}</td>
-                    <td class='text-right txtr'>".number_format($row['SellPrice'])."</td>
+                    <td class='text-center txtc'>{$row['Specification']}</td>
+                    <td class='text-right txtr'>".number_format($row['Qty'])."</td>
+                    <td class='text-right txtr'>".number_format($row['UnitPrice'])."</td>
                     <td class='text-right txtr'>".number_format($row['TotalPrice'])."</td>
                 </tr> ";
             }                    
-            $out .= "<tr class='text-right txtr'>
-                    <td colspan='4'>
-                        Total<br>
-                        Disc(%)<br>
-                        SubTotal<br>
-                        Deposit<br>
-                        Remaining
-                    </td>
-                    <td>
-                        ".number_format($voucher_row["TotalAmt"])."<br>
-                        ".number_format($voucher_row["Dis"])."<br>
-                        ".number_format($voucher_row["Total"])."<br>
-                        ".number_format($voucher_row["Cash"])."<br>
-                        ".number_format($voucher_row["Refund"])."<br>
-                    </td>
-                </tr>
-                <tr class='text-center txt'>
-                    <td colspan='5'>
-                        ********** Thank You **********
-                    </td>   
-                </tr>
+            $out .= "
             </table>
             <br><br><br>
-            <div style='text-align: right; margin-bottom: 20px; margin-right: 20px;'>
-                <button class='btn btn-primary' id='btnprint'>Print</button>
-            </div>
+            
             ";      
             /////////////
             echo $out;

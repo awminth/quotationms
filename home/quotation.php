@@ -1,15 +1,37 @@
 <?php
-include('../config.php');
-include(root.'master/header.php');
+    include('../config.php');
+    include(root.'master/header.php');
+    $userid = $_SESSION["naiip_userid"];
+    $createquotationid = $_SESSION["quotationaid"];
 
-function create_code(){
-   // အချိန်ကို မိုက်ခရိုစက္ကန့်အထိ အခြေခံပြီး 13-character string တစ်ခု ထုတ်ပေးပါတယ်
-$quickCode = uniqid();
-
-echo $quickCode; // ဥပမာ: 6702c2e4726e8
-}
-
-
+    $eaid = 0;
+    $name_project = "projectid";
+    $name_name = "name";
+    $name_dt = "dt";
+    $projectid = 0;
+    $name = "";
+    $dt = date("Y-m-d");
+    $frm = "frmsavevoucher";
+    $actionvoucher = "savevoucher";
+    $voucherclass = "save";
+    $btnvoucher = "Save";
+    $sql = "SELECT * FROM tblquotationvoucher WHERE CreatequotationID='$createquotationid'";
+    $result = mysqli_query($con,$sql);
+    if(mysqli_num_rows($result)){
+        $row = mysqli_fetch_array($result);
+        $eaid = $row["AID"];
+        $projectid = $row["ProjectID"];
+        $name = $row["Name"];
+        $dt = $row["Date"];
+        $frm = "frmeditvoucher";
+        $actionvoucher = "editvoucher";
+        $voucherclass = "edit";
+        $btnvoucher = "Edit";
+        $name_project = "eprojectid";
+        $name_name = "ename";
+        $name_dt = "edt";
+    }
+    $usertype = GetString("SELECT UserType FROM tbluser WHERE AID='{$userid}'");
 ?>
 
 <!-- Content Wrapper. Contains page content -->
@@ -30,9 +52,13 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
             <div class="row">
                 <div class="col-12 col-sm-12">
                     <div class="card">
-                        <div class="card-header">
-                            <a href="<?= roothtml.'home/newquotation.php'?>" class="btn btn-primary"><i
-                                    class="fas fa-plus"></i> New</a>
+                        <div class="card-header row">
+                            <div>
+                                <a href="<?= roothtml.'home/home.php'?>" class="btn btn-primary"><i class="fas fa-back"></i> Back</a>
+                            </div>
+                            <div>
+                                <a href="#" class="btn btn-primary" id="btnnew"><i class="fas fa-plus"></i> New</a>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="col-sm-12">
@@ -40,73 +66,40 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
                                 <hr class="my-3">
                                 <!-- For text boxes -->
                                 <div class="col-sm-10 float-right">
-                                    <form id="frmsave" method="POST">
-                                        <input type="hidden" name="action" value="save" />
+                                    <form id="<?= $frm?>" method="POST">
+                                        <input type="hidden" name="action" value="<?= $actionvoucher?>" />
+                                        <input type="hidden" name="eaid" value="<?= $eaid?>">
                                         <div class="col-md-12">
                                             <div class="form-group row">
-                                                <label class="col-md-3 label-control" for="userinput1">Select Category</label>
+                                                <label class="col-md-3 label-control" for="userinput1">Project Name :
+                                                </label>
                                                 <div class="col-md-9 mx-auto">
-                                                    <input type="number" class="form-control border-primary text-right"
-                                                        placeholder="Discount" value="0" name="disc" id="disc">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group row">
-                                                <label class="col-md-3 label-control"
-                                                    for="userinput1">TotalPrice</label>
-                                                <div class="col-md-9 mx-auto">
-                                                    <input type="number" class="form-control border-primary text-right"
-                                                        placeholder="TotalPrice" name="finaltotalprice" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group row">
-                                                <label class="col-md-3 label-control" for="userinput1">Deposit
-                                                    Amount</label>
-                                                <div class="col-md-9 mx-auto">
-                                                    <input type="number" class="form-control border-primary text-right"
-                                                        placeholder="Deposit Amount" name="payamt" value="0"
-                                                        id="payamt">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group row">
-                                                <label class="col-md-3 label-control" for="userinput1">Remain</label>
-                                                <div class="col-md-9 mx-auto">
-                                                    <input type="number" class="form-control border-primary text-right"
-                                                        placeholder="Remain" name="change" readonly>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group row">
-                                                <label class="col-md-3 label-control"
-                                                    for="userinput1">CustomerName</label>
-                                                <div class="col-md-8 mx-auto">
                                                     <select class="form-control border-success select2"
-                                                        name="customername" id="customername">
-                                                        <option value="">Choose Customer</option>
-
+                                                        name="<?= $name_project?>">
+                                                        <option value="">Choose Project</option>
+                                                        <?=load_project($projectid);?>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-1 text-center">
-                                                    <div class="input-group-text"><i id="newcustomer"
-                                                            class="fas fa-plus-circle text-teal"></i>
-                                                    </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group row">
+                                                <label class="col-md-3 label-control" for="userinput1">Name : </label>
+                                                <div class="col-md-9 mx-auto">
+                                                    <input type="text" name="<?= $name_name?>"
+                                                        class="form-control border-primary" value="<?= $name?>">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group row">
-                                                <label class="col-md-3 label-control" for="timesheetinput3">Date</label>
+                                                <label class="col-md-3 label-control" for="timesheetinput3">Date :
+                                                </label>
                                                 <div class="col-md-9 mx-auto">
                                                     <div class="position-relative has-icon-left">
                                                         <input type="date" id="timesheetinput3"
-                                                            class="form-control border-primary" name="dt"
-                                                            value="<?= date("Y-m-d")?>">
+                                                            class="form-control border-primary" name="<?= $name_dt?>"
+                                                            value="<?= $dt?>">
                                                         <div class="form-control-position">
                                                             <i class="ft-message-square"></i>
                                                         </div>
@@ -117,7 +110,7 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
                                         <br>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-success form-control col-sm-6"><i
-                                                    class="la la-save"></i>Save</button>
+                                                    class="fas fa-<?=$voucherclass?>"></i><?= $btnvoucher?></button>
                                         </div>
                                     </form>
                                 </div>
@@ -134,25 +127,144 @@ echo $quickCode; // ဥပမာ: 6702c2e4726e8
 </div>
 <!-- /.content-wrapper -->
 
+<!-- New Modal -->
+<div class="modal fade" id="newmodal">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header bg-<?=$color?>">
+                <h4 class="modal-title">New Quotation</h4>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="frmsave" method="POST">
+                <input type="hidden" name="action" value="save">
+                <div class='modal-body' data-spy='scroll' data-offset='50'>
+                    <div class="form-group">
+                        <label for="usr"> Category Name :</label>
+                        <div>
+                            <select class="form-control border-success select2" name="categoryid" required>
+                                <option value="">Choose Category</option>
+                                <?=load_category();?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Item Name :</label>
+                        <textarea rows="5" class="form-control border-success" name="itemname"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Specification :</label>
+                        <textarea rows="5" class="form-control border-success" name="specification"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Qty :</label>
+                        <input type="number" name="qty" class="form-control border-success" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Website Link :</label>
+                        <input type="text" name="weblink" class="form-control border-success">
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Remark :</label>
+                        <textarea rows="5" class="form-control border-success" name="remark"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Date :</label>
+                        <input type="date" name="dt" class="form-control border-success" value="<?= date("Y-m-d")?>">
+                    </div>
+                </div>
+                <div class='modal-footer'>
+                    <button type='submit' class='btn btn-<?=$color?>'><i class="fas fa-save"></i>
+                        Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editmodal">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header bg-<?=$color?>">
+                <h4 class="modal-title">Edit Quotation</h4>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="frmedit" method="POST">
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="eaid">
+                <div class='modal-body' data-spy='scroll' data-offset='50'>
+                    <div class="form-group">
+                        <label for="usr"> Category Name :</label>
+                        <div>
+                            <select class="form-control border-success select2" name="ecategoryid">
+                                <option value="">Choose Category</option>
+                                <?=load_category();?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Item Name :</label>
+                        <textarea rows="5" class="form-control border-success" name="eitemname"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Specification :</label>
+                        <textarea rows="5" class="form-control border-success" name="especification"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Qty :</label>
+                        <input type="number" name="eqty" class="form-control border-success" value="0" id="qty">
+                    </div>
+                    <div class="form-group" <?= $usertype == "Admin" ? "" : "style='display:none;'"?>>
+                        <label for="usr"> Unit Price :</label>
+                        <input type="number" name="eunitprice" class="form-control border-success" value="0"
+                            id="unitprice">
+                    </div>
+                    <div class="form-group" <?= $usertype == "Admin" ? "" : "style='display:none;'"?>>
+                        <label for="usr"> Total Price :</label>
+                        <input type="number" name="etotalprice" class="form-control border-success" value="0" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Website Link :</label>
+                        <input type="text" name="eweblink" class="form-control border-success">
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Remark :</label>
+                        <textarea rows="5" class="form-control border-success" name="eremark"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="usr"> Date :</label>
+                        <input type="date" name="edt" class="form-control border-success" value="<?= date("Y-m-d")?>">
+                    </div>
+                </div>
+                <div class='modal-footer'>
+                    <button type='submit' class='btn btn-<?=$color?>'><i class="fas fa-edit"></i>
+                        Edit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- voucher Modal -->
 <div class="modal fade text-left" id="vouchermodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel25"
     aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header bg-success">
-                <label class="modal-title text-text-bold-600" id="myModalLabel25">အရောင်းဘောက်ချာ</label>
+                <label class="modal-title text-text-bold-600" id="myModalLabel25">Quotation Print</label>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="btnpayclose">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <form id="frmvoucher" method="POST">
                 <input type="hidden" name="action" value="viewvoucher" />
-                <div class="modal-body">
+                <div id="printdata" class="container">
 
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-outline-primary"><i class="la la-print"></i>Print</button>
+                <div style='text-align: right; margin-bottom: 20px; margin-right: 20px;'>
+                    <button class='btn btn-primary' id='btnprint'>Print</button>
                 </div>
             </form>
         </div>
@@ -166,7 +278,25 @@ var ajax_url = "<?php echo roothtml.'home/quotation_action.php'; ?>";
 
 $(document).ready(function() {
 
-    function loadpage(page) {
+    //print js fun
+    function print_fun(place) {
+        printJS({
+            printable: place,
+            type: 'html',
+            style: 'table, tr,td {font-weight: bold; font-size: 10px;border-bottom: 1px solid LightGray;border-collapse: collapse;}' +
+                '.txtc{text-align: center;font-weight: bold;}' +
+                '.txtr{text-align: right;font-weight: bold;}' +
+                '.txtl{text-align: left;font-weight: bold;}' +
+                ' h5{ text-align: center;font-weight: bold;}' +
+                '.fs{font-size: 10px;font-weight: bold;}' +
+                '.txt,h5 {text-align: center;font-size: 10px;font-weight: bold;}' +
+                '.lt{width:50%;float:left;font-weight: bold;}' +
+                '.rt{width:50%;float:right;font-weight: bold;}' +
+                '.wno{width:5%;font-weight: bold;}',
+        });
+    }
+
+    function loadpage() {
         $.ajax({
             type: "post",
             url: ajax_url,
@@ -179,47 +309,34 @@ $(document).ready(function() {
                 $("[name='itemname']").focus();
             }
         });
-
-        // calculate();
     }
     loadpage();
 
     function calculate() {
-        var qty = $("[name='qty']").val();
-        var sellpriceperunit = $("[name='sellpriceperunit']").val();
-        var totalprice = qty * sellpriceperunit;
-        $("[name='totalprice']").val(totalprice);
+        var qty = $("[name='eqty']").val();
+        var unitprice = $("[name='eunitprice']").val();
+        var totalprice = qty * unitprice;
+        $("[name='etotalprice']").val(totalprice);
     }
 
-    function calculate_one() {
-        var totalpriceshow = Number($('#showtablecreate #totalpriceshow').text().replace(/,/g, ''));
-
-        var predisc = $("[name='disc']").val();
-        var disc = predisc * totalpriceshow / 100;
-        var finaltotalprice = totalpriceshow - disc;
-        var totalpay = $("[name='payamt']").val();
-        var change = totalpay - finaltotalprice;
-        $("[name='finaltotalprice']").val(finaltotalprice);
-        $("[name='change']").val(change);
-        $("[name='pretotalprice']").val(totalpriceshow);
-        var $changeInput = $("[name='change']");
-        $changeInput.val(change);
-        if (change < 0) {
-            $changeInput.addClass('text-danger');
-        } else {
-            $changeInput.removeClass('text-danger');
-        }
-    }
-
-    $(document).on("keyup", "#sellpriceperunit, #qty", function() {
+    $(document).on("keyup", "#qty", function() {
         calculate();
     });
 
-    $(document).on("keyup", "#disc,#payamt", function() {
-        calculate_one();
+    $(document).on("keyup", "#unitprice", function() {
+        calculate();
     });
 
-    $("#frmsavetemp").on("submit", function(e) {
+    $(document).on("click", "#btnprint", function(e) {
+        e.preventDefault();
+        print_fun("printdata");
+    });
+
+    $(document).on("click", "#btnnew", function() {
+        $("#newmodal").modal("show");
+    });
+
+    $("#frmsave").on("submit", function(e) {
         e.preventDefault();
         var formData = new FormData(this);
         $.ajax({
@@ -231,14 +348,16 @@ $(document).ready(function() {
             global: false,
             success: function(data) {
                 if (data == 1) {
-                    $("[name='eaid']").val(0);
+                    swal("Successful",
+                        "Save data success.",
+                        "success");
                     $("[name='itemname']").val('');
-                    $("[name='qty']").val('');
-                    $("[name='sellpriceperunit']").val('');
-                    $("[name='totalprice']").val('');
-                    window.location.reload();
-                    load_pagecreate();
-
+                    $("[name='specification']").val('');
+                    $("[name='qty']").val('0');
+                    $("[name='weblink']").val('');
+                    $("[name='remark']").val('');
+                    swal.close();
+                    loadpage();
                 } else {
                     swal("Error", "Save Data Error.", "Error");
                 }
@@ -246,39 +365,75 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on('click', '#btnedittemp', function(e) {
+    $(document).on('click', '#btnedit', function(e) {
         e.preventDefault();
         var aid = $(this).data('aid');
-        var itemcode = $(this).data('itemcode');
+        var categoryid = $(this).data('categoryid');
         var itemname = $(this).data('itemname');
+        var specification = $(this).data('specification');
         var qty = $(this).data('qty');
-        var sellpriceperunit = $(this).data('sellpriceperunit');
-        var totalprice = $(this).data('totalprice');
+        var weblink = $(this).data('weblink');
+        var remark = $(this).data('remark');
+        var dt = $(this).data('dt');
         $("[name='eaid']").val(aid);
-        $("[name='itemcode']").val(itemcode);
-        $("[name='itemname']").val(itemname);
-        $("[name='qty']").val(qty);
-        $("[name='sellpriceperunit']").val(sellpriceperunit);
-        $("[name='totalprice']").val(totalprice);
+        $("[name='ecategoryid']").val(categoryid).trigger('change');
+        $("[name='eitemname']").val(itemname);
+        $("[name='especification']").val(specification);
+        $("[name='eqty']").val(qty);
+        $("[name='eweblink']").val(weblink);
+        $("[name='eremark']").val(remark);
+        $("[name='edt']").val(dt);
+        $("#editmodal").modal("show");
     });
 
-    $(document).on("click", "#btndeletetemp", function(e) {
+    $("#frmedit").on("submit", function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        $("#editmodal").modal("hide");
+        $.ajax({
+            type: "post",
+            url: ajax_url,
+            data: formData,
+            contentType: false,
+            processData: false,
+            global: false,
+            success: function(data) {
+                if (data == 1) {
+                    swal("Successful",
+                        "Edit data success.",
+                        "success");
+                    $("[name='eitemname']").val('');
+                    $("[name='especification']").val('');
+                    $("[name='eqty']").val('0');
+                    $("[name='eweblink']").val('');
+                    $("[name='eremark']").val('');
+                    swal.close();
+                    loadpage();
+                } else {
+                    swal("Error", "Edit Data Error.", "Error");
+                }
+            }
+        });
+    });
+
+    $(document).on("click", "#btndelete", function(e) {
         e.preventDefault();
         var aid = $(this).data("aid");
-
+        var itemname = $(this).data("itemname");
         $.ajax({
             type: "post",
             url: ajax_url,
             data: {
-                action: 'deletetemp',
-                aid: aid
+                action: 'delete',
+                aid: aid,
+                itemname: itemname
             },
             success: function(data) {
                 if (data == 1) {
                     swal("Successful",
                         "Delete data success.",
                         "success");
-                    load_pagecreate();
+                    loadpage();
                     swal.close();
                 } else {
                     swal("Error",
@@ -290,13 +445,8 @@ $(document).ready(function() {
 
     });
 
-    $("#frmsave").on("submit", function(e) {
+    $("#frmsavevoucher").on("submit", function(e) {
         e.preventDefault();
-        var customerid = $("[name='customername']").val();
-        if (customerid == '') {
-            swal("Information", "Please select customer name.", "info");
-            return;
-        }
         var formData = new FormData(this);
         $.ajax({
             type: "post",
@@ -304,281 +454,50 @@ $(document).ready(function() {
             data: formData,
             contentType: false,
             processData: false,
+            global: false,
             success: function(data) {
-
                 if (data != 0) {
-                    $("#frmvoucher").html(data);
+                    swal("Successful",
+                        "Save data success.",
+                        "success");
+                    swal.close();
+                    $("#printdata").html(data);
                     $("#vouchermodal").modal("show");
-                    $("[name='disc']").val(0);
-                    $("[name='pretotalprice']").val('');
-                    $("[name='finaltotalprice']").val('');
-                    $("[name='payamt']").val('');
-                    $("[name='change']").val('');
-                    $("[name='customername']").val('');
-                    load_pagecreate();
                 } else {
-                    swal("Error", "Save Data Error.", "error");
+                    swal("Error", "Save Data Error.", "Error");
                 }
             }
         });
     });
 
-
-
-    ////////////////////////////////////////////////////////////////////
-    // View Pre Order Page
-    ////////////////////////////////////////////////////////////////////
-    function load_pageview(page) {
-        var entryvalue = $("[name='hid']").val();
-        var search = $("[name='ser']").val();
-        var from = $("[name='hfrom']").val();
-        var to = $("[name='hto']").val();
-        var customer = $("[name='hcustomer']").val();
-
+    $("#frmeditvoucher").on("submit", function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
         $.ajax({
             type: "post",
             url: ajax_url,
-            data: {
-                action: 'showvieworder',
-                page_no: page,
-                entryvalue: entryvalue,
-                search: search,
-                from: from,
-                to: to,
-                customer: customer
-            },
+            data: formData,
+            contentType: false,
+            processData: false,
+            global: false,
             success: function(data) {
-                $("#showvieworder").html(data);
-            }
-        });
-    }
-    load_pageview();
-
-    $(document).on('click', '.page-link', function() {
-        var pageid = $(this).data('page_number');
-        load_pageview(pageid);
-    });
-
-    $(document).on("change", "#entry", function() {
-        var entryvalue = $(this).val();
-        $("[name='hid']").val(entryvalue);
-        load_pageview();
-    });
-
-    $(document).on("keyup", "#searching", function() {
-        var serdata = $(this).val();
-        $("[name='ser']").val(serdata);
-        load_pageview();
-    });
-
-    $(document).on("click", "#btnsearch", function() {
-        var from = $("[name='dtfrom']").val();
-        var to = $("[name='dtto']").val();
-        $("[name='hfrom']").val(from);
-        $("[name='hto']").val(to);
-        load_pageview();
-    });
-
-    $(document).on("change", "#customername1", function() {
-        var serdata = $(this).val();
-        $("[name='hcustomer']").val(serdata);
-        load_pageview();
-    });
-
-    $(document).on("click", "#btnvieworder", function() {
-        var vno = $(this).data("vno");
-        $.ajax({
-            type: "post",
-            url: ajax_url,
-            data: {
-                action: 'viewvoucher',
-                vno: vno
-            },
-            success: function(data) {
-                $("#frmvoucher").html(data);
-                $("#vouchermodal").modal("show");
-            }
-        });
-    });
-
-    $(document).on("click", "#btnconfirm", function(e) {
-        e.preventDefault();
-        var aid = $(this).data("aid");
-        swal({
-                title: "Confirm?",
-                text: "Are you sure Confirm PreOrder!",
-                type: "success",
-                showCancelButton: true,
-                confirmButtonClass: "btn-success",
-                confirmButtonText: "Yes, Confirm it!",
-                closeOnConfirm: false
-            },
-            function() {
-                $.ajax({
-                    type: "post",
-                    url: ajax_url,
-                    data: {
-                        action: 'confirm',
-                        aid: aid
-                    },
-                    success: function(data) {
-                        if (data == 1) {
-                            swal("Successful",
-                                "Confirm data success.",
-                                "success");
-                            load_pageview();
-                            swal.close();
-                        } else {
-                            swal("Error",
-                                "Confirm data failed.",
-                                "error");
-                        }
-                    }
-                });
-            });
-    });
-
-    $(document).on("click", "#btnreturn", function(e) {
-        e.preventDefault();
-        var aid = $(this).data("aid");
-        swal({
-                title: "Preorder Return?",
-                text: "Are you sure Return PreOrder!",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonClass: "btn-warning",
-                confirmButtonText: "Yes, Return it!",
-                closeOnConfirm: false
-            },
-            function() {
-                $.ajax({
-                    type: "post",
-                    url: ajax_url,
-                    data: {
-                        action: 'return',
-                        aid: aid
-                    },
-                    success: function(data) {
-                        if (data == 1) {
-                            swal("Successful",
-                                "Return data success.",
-                                "success");
-                            load_pageview();
-                            swal.close();
-                        } else {
-                            swal("Error",
-                                "Return data failed.",
-                                "error");
-                        }
-                    }
-                });
-            });
-    });
-
-    // add customer
-    $(document).on("click", "#newcustomer", function() {
-        $("#btnnewmodal").modal("show");
-    });
-
-    $(document).on("click", "#btncancel", function(e) {
-        e.preventDefault();
-        var aid = $(this).data("aid");
-        swal({
-                title: "Preorder Cancel?",
-                text: "Are you sure Cancel PreOrder!",
-                type: "error",
-                showCancelButton: true,
-                confirmButtonClass: "btn-danger",
-                confirmButtonText: "Yes, Cancel it!",
-                closeOnConfirm: false
-            },
-            function() {
-                $.ajax({
-                    type: "post",
-                    url: ajax_url,
-                    data: {
-                        action: 'cancel',
-                        aid: aid
-                    },
-                    success: function(data) {
-                        if (data == 1) {
-                            swal("Successful",
-                                "Cancel data success.",
-                                "success");
-                            load_pageview();
-                            swal.close();
-                        } else {
-                            swal("Error",
-                                "Cancel data failed.",
-                                "error");
-                        }
-                    }
-                });
-            });
-    });
-
-
-    $(document).on("click", "#btnsave", function(e) {
-        e.preventDefault();
-        var name = $("#name").val();
-        var phno = $("#phno").val();
-        var address = $("#address").val();
-        var email = $("#email").val();
-        if (name == "" || phno == "" || address == "") {
-            swal("Information", "Please fill all data", "info");
-        } else {
-            $.ajax({
-                type: "post",
-                url: "<?php echo roothtml.'pos/pos_action.php' ?>",
-                data: $("#frm").serialize() + "&action=save",
-                success: function(data) {
-                    if (data == 1) {
-                        swal("Successful!", "Save Successful.",
-                            "success");
-                        window.location.reload();
-                    } else {
-                        swal("Error!", "Error Save.", "error");
-                    }
+                if (data != 0) {
+                    swal("Successful",
+                        "Edit data success.",
+                        "success");
+                    swal.close();
+                    $("#printdata").html(data);
+                    $("#vouchermodal").modal("show");
+                } else {
+                    swal("Error", "Edit Data Error.", "Error");
                 }
-            });
-        }
+            }
+        });
     });
 
-    $(document).on("click", "#btndeleteorder", function(e) {
+    $(document).on("click", "#btnpayclose", function(e) {
         e.preventDefault();
-        var vno = $(this).data("vno");
-        swal({
-                title: "Delete?",
-                text: "Are you sure delete!",
-                type: "error",
-                showCancelButton: true,
-                confirmButtonClass: "btn-danger",
-                confirmButtonText: "Yes, delete it!",
-                closeOnConfirm: false
-            },
-            function() {
-                $.ajax({
-                    type: "post",
-                    url: ajax_url,
-                    data: {
-                        action: 'deleteorder',
-                        vno: vno
-                    },
-                    success: function(data) {
-                        if (data == 1) {
-                            swal("Successful",
-                                "Delete data success.",
-                                "success");
-                            load_pageview();
-                            swal.close();
-                        } else {
-                            swal("Error",
-                                "Delete data failed.",
-                                "error");
-                        }
-                    }
-                });
-            });
+        window.location.href = "<?= roothtml.'home/home.php' ?>."
     });
 
 });

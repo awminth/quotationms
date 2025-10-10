@@ -36,7 +36,7 @@ include(root.'master/header.php');
                                 <label>User</label>
                                 <select class="form-control select2" name="customer">
                                     <option value="">Select User</option>
-                                    <?=load_customer();?>
+                                    
                                 </select>
                             </div>                            
                             <div class="form-group">

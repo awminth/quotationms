@@ -5,8 +5,8 @@ $action = $_POST["action"];
 
 if($action == 'show'){
     $aid = $_SESSION["quotationaid"];
-    $sql="SELECT q.*,c.Title AS title,g.Name AS categoryname FROM tblquotation q,tblcreatequotation c,
-    tblcategory g WHERE q.CreatequotationID=c.AID AND q.CategoryID=g.AID AND q.AID='{$aid}' ORDER BY q.AID DESC";
+    $sql="SELECT q.*,c.Title AS title,g.Name AS categoryname FROM tblquotation q,tblcreatequotation c,tblcategory g 
+    WHERE q.CreatequotationID=c.AID AND q.CategoryID=g.AID AND q.CreatequotationID='{$aid}' ORDER BY q.AID DESC";
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     $out="";
     if(mysqli_num_rows($result) > 0){
@@ -28,7 +28,7 @@ if($action == 'show'){
         </thead>
         <tbody>
         ';
-        
+        $no = 0;
         while($row = mysqli_fetch_array($result)){
             $no=$no+1;
             $out.="<tr>
@@ -48,13 +48,21 @@ if($action == 'show'){
                     </a>
                         <div class='dropdown-menu'>
                             <a href='#' id='btnedit' class='dropdown-item'
-                                data-aid='{$row['AID']}'>
+                                data-aid='{$row['AID']}'
+                                data-categoryid='{$row['CategoryID']}'
+                                data-itemname='{$row['ItemName']}'
+                                data-specification='{$row['Specification']}'
+                                data-qty='{$row['Qty']}'
+                                data-weblink='{$row['WebsiteLink']}'
+                                data-remark='{$row['Remark']}'
+                                data-dt='{$row['Date']}'>
                                 <i class='fas fa-edit text-primary'
                                 style='font-size:13px;'></i>
                             Edit</a>
                             <div class='dropdown-divider'></div>
                             <a href='#' id='btndelete' class='dropdown-item'
-                                data-aid='{$row['AID']}'><i
+                                data-aid='{$row['AID']}'
+                                data-itemname='{$row['ItemName']}'><i
                                 class='fas fa-trash text-danger'
                                 style='font-size:13px;'></i>
                             Delete</a>                          
@@ -94,6 +102,131 @@ if($action == 'show'){
         echo $out;
     }
 
+}
+
+if($action == "save"){
+    $createquotationid = $_SESSION["quotationaid"];
+    $categoryid = $_POST["categoryid"];
+    $itemname = $_POST["itemname"];
+    $specification = $_POST["specification"];
+    $qty = $_POST["qty"];
+    $weblink = $_POST["weblink"];
+    $remark = $_POST["remark"];
+    $dt = $_POST["dt"];
+    $data = [
+        "CategoryID" => $categoryid,
+        "ItemName" => $itemname,
+        "Specification" => $specification,
+        "Qty" => $qty,
+        "WebsiteLink" => $weblink,
+        "Remark" => $remark,
+        "CreatequotationID" => $createquotationid,
+        "Date" => $dt
+    ];  
+    $result = insertData_Fun("tblquotation",$data);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် Quotation name(".$itemname .")အမည်ဖြင့်အသစ်သွင်းသွားသည်။");
+        echo 1;
+    }
+    else{
+        echo 0;
+    }
+}
+
+if($action == "edit"){
+    $aid = $_POST["eaid"];
+    $categoryid = $_POST["ecategoryid"];
+    $itemname = $_POST["eitemname"];
+    $specification = $_POST["especification"];
+    $qty = $_POST["eqty"];
+    $unitprice = $_POST["eunitprice"];
+    $totalprice = $_POST["etotalprice"];
+    $weblink = $_POST["eweblink"];
+    $remark = $_POST["eremark"];
+    $dt = $_POST["edt"];
+    $data = [
+        "CategoryID" => $categoryid,
+        "ItemName" => $itemname,
+        "Specification" => $specification,
+        "Qty" => $qty,
+        "UnitPrice" => $unitprice,
+        "TotalPrice" => $totalprice,
+        "WebsiteLink" => $weblink,
+        "Remark" => $remark,
+        "Date" => $dt
+    ];  
+    $where = [
+        "AID" => $aid
+    ];
+    $result = updateData_Fun("tblquotation",$data,$where);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် Quotation name(".$itemname .")အားပြင်ဆင်သွားသည်။");
+        echo 1;
+    }
+    else{
+        echo 0;
+    }
+}
+
+if($action == "delete"){
+    $aid = $_POST["aid"];
+    $itemname = $_POST["itemname"];
+    $where = [
+        "AID" => $aid
+    ];
+    $result = deleteData_Fun("tblquotation",$where);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် Quotation name(".$itemname .")အားဖျက်သွားသည်။");
+        echo 1;
+    }
+    else{
+        echo 0;
+    }
+}
+
+if($action == "savevoucher"){
+    $createquotationid = $_SESSION["quotationaid"];
+    $projectid = $_POST["projectid"];
+    $name = $_POST["name"];
+    $dt = $_POST["dt"];
+    $data = [
+        "CreatequotationID" => $createquotationid,
+        "ProjectID" => $projectid,
+        "Name" => $name,
+        "Date" => $dt
+    ];  
+    $result = insertData_Fun("tblquotationvoucher",$data);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် Quotation Voucher တစ်စောင်အားအသစ်သွင်းသွားသည်။");
+        printVoucher($createquotationid);
+    }
+    else{
+        echo 0;
+    }
+}
+
+if($action == "editvoucher"){
+    $createquotationid = $_SESSION["quotationaid"];
+    $aid = $_POST["eaid"];
+    $projectid = $_POST["eprojectid"];
+    $name = $_POST["ename"];
+    $dt = $_POST["edt"];
+    $data = [
+        "ProjectID" => $projectid,
+        "Name" => $name,
+        "Date" => $dt
+    ]; 
+    $where = [
+        "AID" => $aid
+    ]; 
+    $result = updateData_Fun("tblquotationvoucher",$data,$where);
+    if($result){
+        save_log($_SESSION["naiip_username"]." သည် Quotation Voucher အားပြင်ဆင်သွားသည်။");
+        printVoucher($createquotationid);
+    }
+    else{
+        echo 0;
+    }
 }
 
 ?>
