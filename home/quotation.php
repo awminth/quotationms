@@ -215,12 +215,12 @@
                     </div>
                     <div class="form-group" <?= $usertype == "Admin" ? "" : "style='display:none;'"?>>
                         <label for="usr"> Unit Price :</label>
-                        <input type="number" name="eunitprice" class="form-control border-success" value="0"
+                        <input type="number" name="eunitprice" class="form-control border-success" 
                             id="unitprice">
                     </div>
                     <div class="form-group" <?= $usertype == "Admin" ? "" : "style='display:none;'"?>>
                         <label for="usr"> Total Price :</label>
-                        <input type="number" name="etotalprice" class="form-control border-success" value="0" readonly>
+                        <input type="number" name="etotalprice" class="form-control border-success" readonly>
                     </div>
                     <div class="form-group">
                         <label for="usr"> Website Link :</label>
@@ -322,6 +322,8 @@ $(document).ready(function() {
         var itemname = $(this).data('itemname');
         var specification = $(this).data('specification');
         var qty = $(this).data('qty');
+        var unitprice = $(this).data('unitprice');
+        var totalprice = $(this).data('totalprice');
         var weblink = $(this).data('weblink');
         var remark = $(this).data('remark');
         var dt = $(this).data('dt');
@@ -330,6 +332,8 @@ $(document).ready(function() {
         $("[name='eitemname']").val(itemname);
         $("[name='especification']").val(specification);
         $("[name='eqty']").val(qty);
+        $("[name='eunitprice']").val(unitprice);
+        $("[name='etotalprice']").val(totalprice);
         $("[name='eweblink']").val(weblink);
         $("[name='eremark']").val(remark);
         $("[name='edt']").val(dt);

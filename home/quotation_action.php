@@ -22,6 +22,8 @@ if($action == 'show'){
             <th>ItemName</th>
             <th>Specification</th>
             <th>Qty</th>
+            <th>UnitPrice</th>
+            <th>TotalPrice</th>
             <th>WebsiteLink</th>
             <th>Remark</th>
             <th>Date</th>
@@ -40,6 +42,8 @@ if($action == 'show'){
                 <td>{$row["ItemName"]}</td>  
                 <td>{$row["Specification"]}</td>  
                 <td>".number_format($row["Qty"])."</td>  
+                <td>".number_format($row["UnitPrice"])."</td>  
+                <td>".number_format($row["TotalPrice"])."</td>  
                 <td>{$row["WebsiteLink"]}</td>  
                 <td>{$row["Remark"]}</td>  
                 <td>".enDate($row["Date"])."</td>  
@@ -55,6 +59,8 @@ if($action == 'show'){
                                 data-itemname='{$row['ItemName']}'
                                 data-specification='{$row['Specification']}'
                                 data-qty='{$row['Qty']}'
+                                data-unitprice='{$row['UnitPrice']}'
+                                data-totalprice='{$row['TotalPrice']}'
                                 data-weblink='{$row['WebsiteLink']}'
                                 data-remark='{$row['Remark']}'
                                 data-dt='{$row['Date']}'>
@@ -142,8 +148,8 @@ if($action == "edit"){
     $itemname = $_POST["eitemname"];
     $specification = $_POST["especification"];
     $qty = $_POST["eqty"];
-    $unitprice = $_POST["eunitprice"];
-    $totalprice = $_POST["etotalprice"];
+    $unitprice = isset($_POST["eunitprice"]) && $_POST["eunitprice"] !== "" ? $_POST["eunitprice"] : 0;
+    $totalprice = isset($_POST["etotalprice"]) && $_POST["etotalprice"] !== "" ? $_POST["etotalprice"] : 0;
     $weblink = $_POST["eweblink"];
     $remark = $_POST["eremark"];
     $dt = $_POST["edt"];
