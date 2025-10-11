@@ -3,6 +3,7 @@ include('../config.php');
 
 $action = $_POST["action"];
 $userid = $_SESSION["naiip_userid"];
+$usertype = $_SESSION["naiip_usertype"];
 
 
 if($action == 'show'){  
@@ -37,9 +38,12 @@ if($action == 'show'){
     if($quotation!=''){
         $a .=" and q.CreatequotationID={$quotation} ";
     }   
+    if($usertype != "Admin"){
+        $a .=" and q.UserID='{$userid}' ";
+    }
     $sql="SELECT q.*,c.AID AS caid,c.Title AS ctitle,p.Name AS projectname FROM tblquotationvoucher q,
-    tblcreatequotation c,tblproject p WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID AND 
-    q.UserID='{$userid}' ".$a." ORDER BY q.AID DESC limit $offset,$limit_per_page";
+    tblcreatequotation c,tblproject p WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID 
+    ".$a." ORDER BY q.AID DESC limit $offset,$limit_per_page";
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     $out="";
     if(mysqli_num_rows($result) > 0){
@@ -72,15 +76,18 @@ if($action == 'show'){
                             title='အသေးစိတ်ကြည့်မည်'
                             data-aid='{$row['AID']}'
                             data-createquotationid='{$row['CreatequotationID']}'
+                            data-userid='{$row['UserID']}'
                             class='btn btn-success btn-sm'><i class='fas fa-eye'></i></a>
                         <a href='#' id='btnedit' data-toggle='tooltip' data-placement='bottom'
                             title='ပြင်ဆင်မည်' 
                             data-aid='{$row['AID']}'
-                            data-createquotationid='{$row['CreatequotationID']}' class='btn btn-info btn-sm'><i
+                            data-createquotationid='{$row['CreatequotationID']}' 
+                            data-createuserid='{$row['UserID']}' class='btn btn-info btn-sm'><i
                             class='fas fa-edit'></i></a>
                         <a href='#' id='btndelete' data-toggle='tooltip' data-placement='bottom'
                             data-aid='{$row['AID']}'
                             data-createquotationid='{$row['CreatequotationID']}'
+                            data-filepath='{$row['CompanyPdf']}'
                             title='ဖျက်သိမ်းမည်' class='btn btn-danger btn-sm'><i
                             class='fas fa-trash'></i></a>
                     </div>
@@ -91,7 +98,7 @@ if($action == 'show'){
         $out.="</table>";
 
         $sql_total="SELECT q.AID FROM tblquotationvoucher q,tblcreatequotation c,tblproject p
-        WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID AND q.UserID='{$userid}' ".$a." 
+        WHERE q.CreatequotationID=c.AID AND q.ProjectID=p.AID ".$a." 
         ORDER BY q.AID DESC";
         $record = mysqli_query($con,$sql_total) or die("fail query");
         $total_record = mysqli_num_rows($record);
@@ -217,19 +224,23 @@ if($action == 'show'){
 if($action == 'view'){
     $aid = $_POST["aid"];
     $createquotationid = $_POST["createquotationid"];
-    printVoucher($createquotationid,$userid);
+    $vuserid = $_POST["vuserid"];
+    printVoucher($createquotationid,$vuserid);
 }
 
 if($action == 'edit'){
     $aid = $_POST["aid"];
     $createquotationid = $_POST["createquotationid"];
+    $createuserid = $_POST["createuserid"];
     $_SESSION["edit_createquotationaid"] = $createquotationid;
+    $_SESSION["edit_createuserid"] = $createuserid;
     echo 1;
 }
 
 if($action == 'delete'){
     $aid = $_POST["aid"];
     $createquotationid = $_POST["createquotationid"];
+    $filepath = $_POST["filepath"];
     //delete quotationsell
     $whereone = [
         "CreatequotationID" => $createquotationid,
@@ -243,6 +254,12 @@ if($action == 'delete'){
         ];
         $restwo = deleteData_Fun("tblquotationvoucher",$wheretwo);
         if($restwo){
+            //delete pdf file
+            if($filepath != "" || $filepath != NULL){
+                if(file_exists(root."upload/files/".$filepath)){
+                    unlink(root.'upload/files/'.$filepath);
+                }
+            }
             save_log($_SESSION["naiip_username"]." သည် Quotation Voucher အားဖျက်သွားသည်။");
             echo 1;
         }
@@ -319,9 +336,10 @@ if($action == 'excel'){
 if($action == 'excelquotation'){
     $voucheraid = $_POST["voucheraid"];
     $vcreatequotationid = $_POST["vcreatequotationid"];
+    $vuserid = $_POST["vuserid"];
     $sql="SELECT q.*,c.Title as title FROM tblquotation q,tblcreatequotation c WHERE 
     q.CreatequotationID=c.AID AND q.CreatequotationID = '{$vcreatequotationid}' AND 
-    q.UserID='{$userid}' ORDER BY q.AID DESC";
+    q.UserID='{$vuserid}' ORDER BY q.AID DESC";
     $result = mysqli_query($con,$sql);
     $out="";
     $fileName = "QuotationList-".date('d-m-Y').".xls";

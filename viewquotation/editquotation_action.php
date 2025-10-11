@@ -6,8 +6,9 @@ $userid = $_SESSION["naiip_userid"];
 
 if($action == 'show'){
     $aid = $_SESSION["edit_createquotationaid"];
+    $createuserid = $_SESSION["edit_createuserid"];
     $sql="SELECT q.*,c.Title AS title,g.Name AS categoryname FROM tblquotation q,tblcreatequotation c,tblcategory g 
-    WHERE q.CreatequotationID=c.AID AND q.CategoryID=g.AID AND q.CreatequotationID='{$aid}' AND q.UserID='{$userid}' 
+    WHERE q.CreatequotationID=c.AID AND q.CategoryID=g.AID AND q.CreatequotationID='{$aid}' AND q.UserID='{$createuserid}' 
     ORDER BY q.AID DESC";
     $result=mysqli_query($con,$sql) or die("SQL a Query");
     $out="";
@@ -44,7 +45,7 @@ if($action == 'show'){
                 <td>".number_format($row["Qty"])."</td>  
                 <td>".number_format($row["UnitPrice"])."</td>  
                 <td>".number_format($row["TotalPrice"])."</td>  
-                <td>{$row["WebsiteLink"]}</td>  
+                <td><a href='".$row["WebsiteLink"]."' target='_blank'>{$row["WebsiteLink"]}</a></td>  
                 <td>{$row["Remark"]}</td>  
                 <td>".enDate($row["Date"])."</td>  
                 <td class='text-center'>
@@ -195,14 +196,37 @@ if($action == "delete"){
 
 if($action == "editvoucher"){
     $createquotationid = $_SESSION["edit_createquotationaid"];
-    $aid = $_POST["eaid"];
+    $aid = $_POST["voucheraid"];
     $projectid = $_POST["eprojectid"];
     $name = $_POST["ename"];
     $dt = $_POST["edt"];
+    $new_filename = "";
+    $hid_fileupload = $_POST["hid_fileupload"];
+
+    //File Upload
+    // PDF file ကို စစ်ဆေးပြီး upload လုပ်ခြင်း
+    if(isset($_FILES['fileupload']) && $_FILES['fileupload']['error'] === UPLOAD_ERR_OK) {
+        $filename = $_FILES['fileupload']['name'];
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $file = $_FILES['fileupload']['tmp_name'];
+        $valid_pdf_extensions = array("pdf", "PDF","docx","DOCX","doc","DOC","XLSX","xlsx","xls","XLS");
+
+        if(in_array($extension, $valid_pdf_extensions)) {
+            $new_filename = date("YmdHis").$extension; // ပုံနဲ့ နာမည်မတူအောင် ပြောင်းထား
+            $new_path = root . "upload/files/" . $new_filename; // PDF အတွက် folder သီးသန့်ထား            
+            if(move_uploaded_file($file, $new_path)){
+                if($hid_fileupload != ""){
+                    unlink(root. "upload/files/" . $hid_fileupload);
+                }
+            }
+            
+        }
+    }
     $data = [
         "ProjectID" => $projectid,
         "Name" => $name,
-        "Date" => $dt
+        "Date" => $dt,
+        "CompanyPdf" => $new_filename
     ]; 
     $where = [
         "AID" => $aid

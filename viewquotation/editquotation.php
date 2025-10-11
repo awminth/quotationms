@@ -3,27 +3,30 @@
     include(root.'master/header.php');
     $userid = $_SESSION["naiip_userid"];
     $edit_createquotationid = isset($_SESSION["edit_createquotationaid"]) ? $_SESSION["edit_createquotationaid"] : 0;
+    $edit_createuserid = isset($_SESSION["edit_createuserid"]) ? $_SESSION["edit_createuserid"] : 0;
 
-    $eaid = 0;
+    $voucheraid = 0;
     $name_project = "projectid";
     $name_name = "name";
     $name_dt = "dt";
     $projectid = 0;
     $name = "";
     $dt = date("Y-m-d");
+    $fileuploadvalue = "";
     $frm = "frmsavevoucher";
     $actionvoucher = "savevoucher";
     $voucherclass = "save";
     $btnvoucher = "Save";
     //For Edit from ViewQuotation
-    $sql = "SELECT * FROM tblquotationvoucher WHERE CreatequotationID='$edit_createquotationid' AND UserID='{$userid}'";
+    $sql = "SELECT * FROM tblquotationvoucher WHERE CreatequotationID='$edit_createquotationid' AND UserID='{$edit_createuserid}'";
     $result = mysqli_query($con,$sql);
     if(mysqli_num_rows($result)){
         $row = mysqli_fetch_array($result);
-        $eaid = $row["AID"];
+        $voucheraid = $row["AID"];
         $projectid = $row["ProjectID"];
         $name = $row["Name"];
         $dt = $row["Date"];
+        $fileuploadvalue = $row["CompanyPdf"];
         $frm = "frmeditvoucher";
         $actionvoucher = "editvoucher";
         $voucherclass = "edit";
@@ -66,6 +69,8 @@
                                     <form id="<?= $frm?>" method="POST">
                                         <input type="hidden" name="action" value="<?= $actionvoucher?>" />
                                         <input type="hidden" name="eaid" value="<?= $eaid?>">
+                                        <input type="hidden" name="voucheraid" value="<?= $voucheraid?>">
+                                        <input type="hidden" name="hid_fileupload" value="<?= $fileuploadvalue?>">
                                         <div class="col-md-12">
                                             <div class="form-group row">
                                                 <label class="col-md-3 label-control" for="userinput1">Project Name :
@@ -101,6 +106,18 @@
                                                             <i class="ft-message-square"></i>
                                                         </div>
                                                     </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group row">
+                                                <label class="col-md-3 label-control" for="userinput1">File Upload : </label>
+                                                <div class="col-md-9 mx-auto">
+                                                    <input type="hidden" name="filename" value="<?= $fileuploadvalue?>">
+                                                    <label class="label-control" for="userinput1" 
+                                                    <?= $fileuploadvalue != "" ? : "style='display:none;'"?>>Company Quotation File Uploadလုပ်ပြီးသားဖြစ်ပါသည်။</label>
+                                                    <input type="file" name="fileupload" id="fileupload" class="form-control"
+                                                    accept=".pdf,.pdf,.docx,.docx,.doc,.doc,xlsx,.xlsx,.xls,.xls">
                                                 </div>
                                             </div>
                                         </div>

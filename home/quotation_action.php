@@ -44,7 +44,7 @@ if($action == 'show'){
                 <td>".number_format($row["Qty"])."</td>  
                 <td>".number_format($row["UnitPrice"])."</td>  
                 <td>".number_format($row["TotalPrice"])."</td>  
-                <td>{$row["WebsiteLink"]}</td>  
+                <td><a href='".$row["WebsiteLink"]."' target='_blank'>{$row["WebsiteLink"]}</a></td> 
                 <td>{$row["Remark"]}</td>  
                 <td>".enDate($row["Date"])."</td>  
                 <td class='text-center'>

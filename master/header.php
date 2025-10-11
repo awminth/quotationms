@@ -193,7 +193,7 @@ if(isset($_SESSION['naiip_userid'])){
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" <?= $_SESSION["naiip_usertype"] == "Admin" ? "" : "style='display:none;'"?>>
                             <a href="<?php echo roothtml.'createquotation/createquotation.php' ?>"
                                 class="nav-link <?php echo (curlink == 'createquotation.php')?'bgactive' : '' ?>">
                                 <i class="nav-icon fas fa-file-medical"></i>
@@ -204,15 +204,37 @@ if(isset($_SESSION['naiip_userid'])){
                         </li>
                         <li class="nav-item">
                             <a href="<?php echo roothtml.'viewquotation/viewquotation.php' ?>"
-                                class="nav-link <?php echo (curlink == 'viewquotation.php')?'bgactive' : '' ?>">
+                                class="nav-link <?php echo (curlink == 'viewquotation.php' || 
+                                curlink == 'editquotation.php')?'bgactive' : '' ?>">
                                 <i class="nav-icon fas fa-list"></i>
                                 <p>
                                     View Quotation
                                 </p>
                             </a>
                         </li>
+                        <li class="nav-item <?php echo (curlink=='quotationreport.php' || curlink == 'quotationdetail.php')?'menu-open' : '' ?>" 
+                        <?= $_SESSION["naiip_usertype"] == "Admin" ? "" : "style='display:none;'"?>>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-cog"></i>
+                                <p>
+                                    Reports
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="<?php echo roothtml.'quotationreport/quotationreport.php' ?>"
+                                        class="nav-link <?php echo (curlink == 'quotationreport.php' || 
+                                        curlink == 'quotationdetail.php')?'bgactive' : '' ?>">
+                                        <i class="far fa-circle nav-icon" style="font-size:10px;"></i>
+                                        <p>Quotation Report</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="nav-item <?php echo (curlink=='printsetting.php'  || curlink == 'category.php' ||
-                        curlink == 'log.php' || curlink == 'project.php')?'menu-open' : '' ?>">
+                        curlink == 'log.php' || curlink == 'project.php')?'menu-open' : '' ?>" 
+                        <?= $_SESSION["naiip_usertype"] == "Admin" ? "" : "style='display:none;'"?>>
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cog"></i>
                                 <p>
@@ -251,7 +273,7 @@ if(isset($_SESSION['naiip_userid'])){
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" <?= $_SESSION["naiip_usertype"] == "Admin" ? "" : "style='display:none;'"?>>
                             <a href="<?php echo roothtml.'setting/usercontrol.php' ?>"
                                 class="nav-link <?php echo (curlink == 'usercontrol.php' || curlink == 'permission.php')?'bgactive' : '' ?>">
                                 <i class="fas fa-users nav-icon"></i>
